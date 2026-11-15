@@ -51,7 +51,10 @@ router.post('/', authMiddleware, (req, res) => {
   res.status(201).json(patient);
 });
 
-// Get patient workspace (Unified data bundle for fast client load)
+/**
+ * GET /api/patients/:patientId/workspace
+ * Unified patient data bundle for fast client load and evaluation.
+ */
 router.get(
   '/:patientId/workspace',
   authMiddleware,
@@ -103,7 +106,10 @@ router.get(
   }
 );
 
-// Update patient settings (Autonomy controls: grace period, emergency phone, accessibility)
+/**
+ * PATCH /api/patients/:patientId
+ * Updates patient settings (Autonomy controls: grace period, emergency phone, accessibility).
+ */
 router.patch(
   '/:patientId',
   authMiddleware,
@@ -119,9 +125,9 @@ router.patch(
     }
 
     const { name, age, emergencyPhone, gracePeriodMinutes, highContrastDefault } = parseResult.data;
-    if (name) patient.name = name;
+    if (name) patient.name = sanitizeString(name, 120);
     if (typeof age === 'number') patient.age = age;
-    if (emergencyPhone) patient.emergencyPhone = emergencyPhone;
+    if (emergencyPhone) patient.emergencyPhone = sanitizeString(emergencyPhone, 30);
     if (typeof gracePeriodMinutes === 'number') {
       patient.gracePeriodMinutes = gracePeriodMinutes;
       // Propagate grace period updates to active schedules
@@ -149,7 +155,10 @@ router.patch(
   }
 );
 
-// High-priority Help Request from Elderly Patient
+/**
+ * POST /api/patients/:patientId/help-request
+ * High-priority Help Request from Elderly Patient with sanitized custom message.
+ */
 router.post(
   '/:patientId/help-request',
   authMiddleware,
