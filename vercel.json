@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/scheduler/run-check",
+      "schedule": "*/2 * * * *"
+    }
+  ]
+}

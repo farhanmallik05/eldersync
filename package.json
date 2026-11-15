@@ -1,0 +1,36 @@
+{
+  "name": "eldersync",
+  "version": "1.0.0",
+  "description": "ElderSync — Patient-Centred Elderly-Care & Medication Adherence Platform",
+  "main": "backend/dist/server.js",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "npm --prefix frontend run build",
+    "build:backend": "npm --prefix backend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start": "node backend/dist/server.js",
+    "test": "vitest run",
+    "typecheck": "npm --prefix backend run build && npm --prefix frontend run build"
+  },
+  "keywords": [
+    "healthcare",
+    "elderly-care",
+    "medication-adherence",
+    "accessibility",
+    "antigravity",
+    "promptwars",
+    "catalyst"
+  ],
+  "author": "Farhan Mallick",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/supertest": "^6.0.2",
+    "concurrently": "^8.2.2",
+    "supertest": "^7.0.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
