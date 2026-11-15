@@ -81,7 +81,7 @@ export const CaregiverEscalationQueue: React.FC<CaregiverEscalationQueueProps> =
                   </span>
                 </div>
                 <p className="text-sm text-slate-700">
-                  Scheduled at <strong>{scheduledTimeStr}</strong> — Grace period elapsed at <strong>{graceDeadlineStr}</strong>.
+                  Scheduled at <strong>{scheduledTimeStr}</strong>. Grace period elapsed at <strong>{graceDeadlineStr}</strong>.
                 </p>
                 <p className="text-xs text-slate-500 mt-1 italic">
                   Note: Alert indicates dose is unconfirmed, not confirmed missed.
@@ -96,7 +96,7 @@ export const CaregiverEscalationQueue: React.FC<CaregiverEscalationQueueProps> =
               <button
                 onClick={() => {
                   setSelectedDose(dose);
-                  setNote(`Called patient — confirmed taking medication now.`);
+                  setNote(`Called patient: confirmed taking medication now.`);
                 }}
                 className="min-touch-target px-5 py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2 flex-shrink-0"
               >
@@ -130,7 +130,7 @@ export const CaregiverEscalationQueue: React.FC<CaregiverEscalationQueueProps> =
                   required
                   rows={3}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-slate-900"
-                  placeholder="e.g., Called Papa — he took it at 9:05 AM with lunch, marking confirmed."
+                  placeholder="e.g., Called Papa: he took it at 9:05 AM with lunch, marking confirmed."
                 />
               </div>
 

@@ -1,111 +1,144 @@
-# ElderSync — Patient-Centred Medication Adherence & Collaborative Care Circle
+# ElderSync — Patient-Centred Elderly Care & Adherence Platform
+### PromptWars × Catalyst — Round 2 Antigravity Execution Pack (Vercel Edition)
 
-[![PromptWars × Catalyst](https://img.shields.io/badge/Competition-PromptWars%20%C3%97%20Catalyst%20Round%202-0D9488?style=for-the-badge)](https://makersneedmore.com)
-[![Engineered with Antigravity](https://img.shields.io/badge/Built%20With-Google%20Antigravity%20IDE-4285F4?style=for-the-badge&logo=google)](https://antigravity.google)
-[![Tests Passing](https://img.shields.io/badge/Tests-TC--01%20to%20TC--06%20Passing-16A34A?style=for-the-badge)](./tests/eldersync.test.ts)
-[![License: MIT](https://img.shields.io/badge/License-MIT-0F172A?style=for-the-badge)](./LICENSE)
+![ElderSync Banner](https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80)
 
-ElderSync is an autonomous, patient-primary elderly healthcare and medication adherence SaaS platform built for **PromptWars × Catalyst Round 2**.
-
-Unlike conventional medication reminders that rely on passive phone notifications, ElderSync gives elderly individuals complete ownership over their health profiles, establishes deterministic server-side escalation when doses remain unconfirmed past a grace period, and coordinates care circles using expiring, single-use, cryptographically hashed passcodes.
+**ElderSync** is an autonomous, patient-centred elderly medication adherence and care circle platform engineered for **PromptWars × Catalyst (Round 2)** using **Google Antigravity IDE** and deployed on **Vercel**.
 
 ---
 
-## 🌟 Key Features & Problem-Solution Alignment
+## 🌟 Why ElderSync?
 
-1. **Patient-Primary Autonomy**: The elderly patient owns their profile, sets preferences, configures grace periods (default 3 min for demo, 5–120 min configurable), confirms doses, and controls/revokes access permissions.
-2. **1-Tap Accessible Dose Confirmations**: Minimum 18px body typography, `>= 56px` touch targets, WCAG AAA high contrast mode, and 1-tap `Taken`, `Skipped` (with reason), or `Unable to Take` actions.
-3. **Deterministic Escalation Engine**: Server-side Cloud Scheduler scans due doses. If unconfirmed past the grace deadline, it dispatches transactional email alerts with deterministic idempotency keys (`esc_${doseId}`) to prevent duplicate alerts.
-4. **Closed-Loop Caregiver Acknowledgement**: Caregivers acknowledge escalated alerts and record notes live in the shared timeline, preventing conflicting phone calls and duplicate panics.
-5. **Secure Passcode Care Circle**: Patients invite caregivers and family using single-use 6-digit numeric passcodes hashed with SHA-256 + salt/pepper, expiring in 15 minutes.
-6. **Doctor Appointments & Reminders**: Doctor visit scheduling with 24-hour proactive email reminders.
-7. **Real 7-Day Adherence Analytics**: Calculated directly from real `doseLogs`, surfacing adherence %, time-of-day disruption slots, and confirmation latency.
-8. **Judge Evaluation Mode**: 1-click quick demo logins (Patient, Caregiver, Family) and a live **"Run Reminder Check Now"** demo trigger.
+Most medication management applications fail the elderly in two ways:
+1. **Passive Alarms:** They rely on local phone notifications that go silent when dismissed. When an elderly person living alone misses a critical dose, family members have no way of knowing until hours or days later.
+2. **Disenfranchising Surveillance:** They treat seniors as passive subjects monitored by nursing staff or adult children, stripping away their independence and dignity.
 
----
-
-## 🏗️ Architecture & Technology Stack
-
-```text
-catalyst/
-├── backend/            # Express, TypeScript, Zod, Idempotent Email Engine
-│   └── src/
-│       ├── config/     # Database store & seeded demo accounts
-│       ├── middleware/ # Auth verification & RBAC permissions
-│       ├── routes/     # Patients, Meds, Doses, CareCircle, Appointments, Scheduler
-│       └── services/   # EmailService, AnalyticsService
-├── frontend/           # React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons
-│   └── src/
-│       ├── components/ # ScheduleDoseCard, CaregiverQueue, CareCircleMatrix, Analytics
-│       ├── context/    # AuthContext, WorkspaceContext, AccessibilityContext
-│       └── views/      # PatientDashboard, CaregiverDashboard, FamilyDashboard, LandingView
-├── tests/              # Vitest & Supertest suite (TC-01 through TC-06)
-├── plan/               # Vibe coding master planning markdown specifications
-├── docs/               # Architecture diagrams and specifications
-├── firestore.rules     # Production Cloud Firestore security rules
-├── Dockerfile          # Single-container production build for Cloud Run (PORT 8080)
-├── vercel.json         # Vercel serverless deployment configuration
-└── PROMPT_LOG.md       # AI-assisted engineering prompt log
-```
+**ElderSync re-engineers this paradigm:**
+- **Patient Sovereignty:** The elderly individual owns their healthcare profile, confirms their doses, generates 6-digit expiring passcodes, and dynamically grants or revokes caregiver permissions.
+- **Deterministic Server-Side Escalation:** Doses are tracked server-side with configurable grace windows (default 3 minutes for live demo). If unconfirmed, Vercel Cron triggers idempotent transactional email alerts.
+- **Closed-Loop Caregiver Collaboration:** When an escalation occurs, caregivers acknowledge the alert and record follow-up notes in real time, preventing duplicate panic calls across family members.
+- **Elderly-First Ergonomics:** Minimum `56px` touch target heights, 18px base typography, font scaling (`A`/`A+`/`A++`), WCAG AAA high-contrast mode, and native Web Audio API confirmation chimes.
 
 ---
 
-## ⚡ Quick Start & Local Execution
+## 🚀 Live Demo Quickstart (For Judges & Evaluators)
 
-### Prerequisites
-- Node.js v18+ (tested on v20 & v24)
-- npm v9+
+When evaluating ElderSync in an **Incognito Browser Window**, use the built-in **Judge Evaluation Bar** at the top of the screen:
 
-### 1. Install Dependencies
-```bash
-npm install
-npm --prefix backend install
-npm --prefix frontend install
+1. **1-Click Demo Logins:**
+   - **Patient View:** Log in as **Robert Vance (Age 74)** to test senior-friendly dose confirmation, add medications, and generate Care Circle passcodes.
+   - **Caregiver View:** Log in as **Nurse Sarah Jenkins** to inspect the Priority Escalation Queue, acknowledge overdue alerts, and record follow-up notes.
+   - **Family View:** Log in as **David Vance (Son)** to inspect the permission matrix, 7-day adherence charts, and audit logs.
+2. **Instant Cron Fast-Forward:** Click **"Run Reminder Check Now"** on the Judge Demo Bar to simulate time past the 3-minute grace window in 2 seconds.
+3. **Notification Outbox Inspector:** Click **"View Outbox"** in the navigation bar to inspect all sent transactional emails with delivery statuses and idempotency keys.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Layer (React 18 + Vite + Tailwind)"]
+        UI["Accessible Role-Aware Dashboards (Patient, Caregiver, Family)"]
+        A11y["WCAG AAA Scaler (18px-22px, High Contrast)"]
+        Sound["Web Audio Synthesizer (Confirmation Chime)"]
+        DemoBar["Judge Demo Bar (Instant Seed & Fast-Forward)"]
+    end
+
+    subgraph Vercel ["Vercel Serverless Infrastructure"]
+        VercelCDN["Vercel Edge Network (Static UI Assets)"]
+        VercelCron["Vercel Cron (Triggering /api/scheduler/run-check every 2m)"]
+        API["Express REST API (/api/* via @vercel/node)"]
+        RateLimit["Rate Limiter (5 attempts / 15m)"]
+        AuthMiddleware["JWT Auth + Demo Token Verifier"]
+        RBAC["Server-Side Permission Guards"]
+    end
+
+    subgraph Persistence ["Dual-Mode Data & Email Layer"]
+        Store["Dual-Mode Store (Auto-Seeded In-Memory / PostgreSQL)"]
+        EmailService["Transactional Email Pipeline (Resend / SMTP / Outbox)"]
+    end
+
+    Client --> VercelCDN
+    Client --> API
+    VercelCron --> API
+    API --> RateLimit --> AuthMiddleware --> RBAC --> Store
+    API --> EmailService
 ```
 
-### 2. Run in Development Mode
-```bash
-# Runs both backend (port 8080) and frontend (port 5173 with proxy)
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+| Layer | Technology | Version | Purpose |
+|---|---|---|---|
+| **Frontend** | React + Vite + TypeScript | React 18, Vite 5 | Fast HMR, lightweight bundle size, strict typing |
+| **Styling** | Tailwind CSS + Lucide Icons | Tailwind v3 | High-contrast WCAG AAA compliance, >=56px touch controls |
+| **Backend** | Node.js + Express on Vercel | Node 20 LTS, Express 4 | Serverless execution, sub-second startup, REST endpoints |
+| **Validation** | Zod | Zod 3.23 | Strict runtime payload schema validation |
+| **Security** | `express-rate-limit`, `crypto` | Built-in | Constant-time hash checks, brute-force rate-limiting |
+| **Automation** | Vercel Cron Jobs | Native `vercel.json` | 2-minute recurring missed-dose evaluation |
+| **Testing** | Vitest + Supertest | Vitest 1.6 | 10 automated test suites with 100% pass rate |
 
-### 3. Run Automated Integration Tests (TC-01 to TC-06)
+---
+
+## 🧪 Automated Testing Matrix (TC-01 to TC-10)
+
+ElderSync includes an exhaustive automated test suite in `tests/eldersync.test.ts`:
+
 ```bash
+# Run all automated tests
 npm test
 ```
 
-### 4. Build for Production
-```bash
-npm run build
-npm start
-```
-The unified Express server serves both the REST API and the compiled frontend SPA from `frontend/dist` on port 8080.
-
----
-
-## 🧪 Verification Test Matrix (`tests/eldersync.test.ts`)
-
-| Test ID | Scenario | Expected Assertion |
+| Test ID | Test Scenario | Verified Invariant |
 |---|---|---|
-| **TC-01** | Passcode Hashing & Single-Use | 1st redemption returns 200 OK; 2nd redemption returns 400 Bad Request; plain code never stored. |
-| **TC-02** | Expired Passcode Rejection | Passcode with `expiresAt < Date.now()` returns 400 Bad Request. |
-| **TC-03** | Patient Autonomy RBAC | Revoked `canManageMeds` permission returns 403 Forbidden on medication mutation. |
-| **TC-04** | Idempotent Notification Locks | Running scheduler check consecutively past grace period creates exactly 1 escalation record. |
-| **TC-05** | Caregiver Acknowledgement | Caregiver acknowledges escalated dose; status updates to ACKNOWLEDGED with audit entry. |
-| **TC-06** | Real Analytics Calculation | 8 TAKEN, 1 SKIPPED, 1 ESCALATED returns 80% adherence rate and flags EVENING disruption window. |
+| **TC-01** | Passcode Hashing & Single-Use Enforcement | Plain passcode never stored; only `sha256(code + pepper)` persisted; code invalidated after first use. |
+| **TC-02** | Expired Passcode Rejection | Codes where `expiresAt < now` return `400 Bad Request`. |
+| **TC-03** | Passcode Brute-Force Rate Limiting | 6th join attempt from the same IP returns `429 Too Many Requests`. |
+| **TC-04** | Patient Autonomy Permission Revocation | Revoked caregiver mutating medications receives `403 Forbidden`. |
+| **TC-05** | State Machine Transitions & Idempotency | Consecutive scheduler runs past grace deadline dispatch exactly 1 escalation email. |
+| **TC-06** | Caregiver Closed-Loop Acknowledgement | Caregiver records note, updates status to `TAKEN`/`ACKNOWLEDGED`, writes audit log. |
+| **TC-07** | Deterministic Dose Materialization | Daily dose materialization is 100% idempotent; `{scheduleId}_{YYYY-MM-DD}` prevents duplication. |
+| **TC-08** | Real Adherence Analytics Calculation | Accurately calculates 7-day adherence %, counts, and disruption window from `doseLogs`. |
+| **TC-09** | Health Check & System Status | `GET /api/health` returns `200 OK` with status `healthy` and metrics. |
+| **TC-10** | Demo Fast-Forward Simulation & Seeding | `POST /api/demo/seed` idempotently resets and seeds full demo workspace. |
 
 ---
 
-## 🎭 5-Act Live Demo Guide for Judges (Incognito Window)
+## 📦 Local Development & Build
 
-1. **Act 1 (Patient Autonomy)**: Open the app, click **"Patient (Robert Vance)"**, add a medication due now, and reload to verify persistence.
-2. **Act 2 (Care Circle Passcode)**: In "Care Circle & Privacy", click **"Generate Single-Use Passcode"** (large 6-digit code with 15m countdown). In a second session as Caregiver, join using the passcode.
-3. **Act 3 (Intelligence & Escalation)**: Leave the dose unconfirmed past the 3-minute grace period. Click **"Run Reminder Check Now"** in the top bar. The dose transitions to `UNCONFIRMED_ESCALATED` and dispatches an idempotent escalation alert.
-4. **Act 4 (Collaboration)**: In the Caregiver view, open the **Priority Escalation Queue**, click **"Acknowledge & Record Follow-Up"**, enter notes, and confirm. All views synchronize immediately.
-5. **Act 5 (Impact & Accessibility)**: Open **Adherence Insights** to view real computed metrics. Toggle **High Contrast Mode** and font scaling (`A++`) to show elderly-first healthcare accessibility.
+```bash
+# 1. Install dependencies
+npm install
+npm --prefix backend install
+npm --prefix frontend install
+
+# 2. Run both backend and frontend concurrently
+npm run dev
+
+# 3. Build for production
+npm run build
+
+# 4. Run automated test suite
+npm test
+```
+
+---
+
+## 🌐 Deploying to Vercel
+
+```bash
+# 1. Install Vercel CLI
+npm i -g vercel
+
+# 2. Deploy to production
+vercel --prod
+```
+
+Configure the following environment variables in Vercel:
+- `JWT_SECRET`: Random 32+ character string
+- `PASSCODE_PEPPER`: Secret salt string
+- `ENABLE_DEMO_TIME_TRAVEL`: Set to `true` for judge fast-forward testing
+- `RESEND_API_KEY`: *(Optional)* Your Resend API key (defaults to in-app outbox view if omitted)
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+MIT License. Created by **Farhan Mallick** for PromptWars × Catalyst Round 2.

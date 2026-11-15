@@ -53,7 +53,7 @@ export const ScheduleDoseCard: React.FC<ScheduleDoseCardProps> = ({
             </span>
           </div>
           <p className="patient-typography text-slate-600 font-medium">
-            {dose.scheduledAt ? 'Scheduled dose' : ''} — Follow instructions:
+            {dose.scheduledAt ? 'Scheduled dose' : ''}: Follow instructions:
           </p>
           <p className="text-base text-slate-700 mt-0.5">
             {/* Find instructions or fallback */}
@@ -80,7 +80,7 @@ export const ScheduleDoseCard: React.FC<ScheduleDoseCardProps> = ({
           )}
           {isEscalated && (
             <span className="badge-red inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-red-100 text-red-800 border border-red-400 animate-bounce">
-              <AlertTriangle className="w-4 h-4" /> Unconfirmed — Escalated
+              <AlertTriangle className="w-4 h-4" /> Unconfirmed: Escalated
             </span>
           )}
           {isAcknowledged && (

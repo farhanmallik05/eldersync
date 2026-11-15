@@ -4,16 +4,19 @@ import { App } from './App';
 import { AuthProvider } from './context/AuthContext';
 import { WorkspaceProvider } from './context/WorkspaceContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <AccessibilityProvider>
-        <WorkspaceProvider>
-          <App />
-        </WorkspaceProvider>
-      </AccessibilityProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <AccessibilityProvider>
+          <WorkspaceProvider>
+            <App />
+          </WorkspaceProvider>
+        </AccessibilityProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

@@ -4,18 +4,11 @@ import app from '../backend/src/server.js';
 import { db, hashPasscode } from '../backend/src/config/database.js';
 import { calculateAdherenceAnalytics } from '../backend/src/services/analyticsService.js';
 
-describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
+describe('ElderSync Quality Gates (TC-01 through TC-10)', () => {
   const patientId = 'patient_robert_vance';
   const patientToken = 'Bearer demo-patient-token';
   const caregiverToken = 'Bearer demo-caregiver-token';
   const familyToken = 'Bearer demo-family-token';
-
-  it('Health Check: GET /api/health returns 200 OK and system status', async () => {
-    const res = await request(app).get('/api/health');
-    expect(res.status).toBe(200);
-    expect(res.body.status).toBe('healthy');
-    expect(res.body.service).toBe('ElderSync API');
-  });
 
   it('TC-01: Passcode Hashing & Single-Use Enforcement', async () => {
     // 1. Patient generates a 6-digit passcode invitation
@@ -63,7 +56,6 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
   });
 
   it('TC-02: Expired Passcode Rejection', async () => {
-    // Seed an expired passcode invitation directly in the database
     const expiredPasscode = '123456';
     const expiredInviteId = 'invite_expired_test';
     db.careInvitations.set(expiredInviteId, {
@@ -78,7 +70,7 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
         canManageAppointments: false,
         receiveEscalationEmails: true,
       },
-      expiresAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour in the past
+      expiresAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour in past
       used: false,
       createdAt: new Date(Date.now() - 7200000).toISOString(),
     });
@@ -92,7 +84,27 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     expect(res.body.error).toMatch(/expired/i);
   });
 
-  it('TC-03: Patient Autonomy Permission Revocation (Server-Side RBAC)', async () => {
+  it('TC-03: Passcode Brute-Force Rate Limiting (429 Too Many Requests)', async () => {
+    // TC-01 made 2 join requests, TC-02 made 1 join request (Total: 3).
+    // Send 2 more invalid requests to hit the 5-request limit:
+    for (let i = 1; i <= 2; i++) {
+      await request(app)
+        .post('/api/care-circle/join')
+        .set('Authorization', caregiverToken)
+        .send({ patientId, passcode: `99990${i}` });
+    }
+
+    // The 6th request MUST be rate-limited and return 429
+    const rateLimitedRes = await request(app)
+      .post('/api/care-circle/join')
+      .set('Authorization', caregiverToken)
+      .send({ patientId, passcode: '999903' });
+
+    expect(rateLimitedRes.status).toBe(429);
+    expect(rateLimitedRes.body.error).toMatch(/too many/i);
+  });
+
+  it('TC-04: Patient Autonomy Permission Revocation (Server-Side RBAC 403)', async () => {
     // 1. Patient revokes canManageMeds from demo-family
     const patchRes = await request(app)
       .patch(`/api/patients/${patientId}/care-members/demo-family`)
@@ -123,11 +135,10 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     expect(medRes.body.error).toMatch(/forbidden/i);
   });
 
-  it('TC-04: Idempotent Reminder & Escalation Transitions', async () => {
-    // Create an overdue test dose
+  it('TC-05: Deterministic State Machine & Idempotent Escalation Deduplication', async () => {
     const testDoseId = 'test_escalation_dose_1';
-    const pastTime = new Date(Date.now() - 30 * 60000).toISOString(); // 30 mins ago
-    const pastGrace = new Date(Date.now() - 25 * 60000).toISOString(); // 25 mins ago
+    const pastTime = new Date(Date.now() - 30 * 60000).toISOString();
+    const pastGrace = new Date(Date.now() - 25 * 60000).toISOString();
 
     db.doseLogs.set(testDoseId, {
       doseId: testDoseId,
@@ -151,7 +162,7 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     const updatedDose = db.doseLogs.get(testDoseId);
     expect(updatedDose?.status).toBe('UNCONFIRMED_ESCALATED');
 
-    // Run scheduler check second time (Simulating recurring 2-min cron)
+    // Run scheduler check second time (Recurring cron trigger)
     const run2 = await request(app)
       .post('/api/scheduler/run-check')
       .send({ simulatedNowIso: new Date().toISOString() });
@@ -163,9 +174,9 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
       n.idempotencyKey.startsWith(`esc_${testDoseId}`)
     );
     expect(caregiverEscalations.length).toBeGreaterThanOrEqual(1);
-    // Running a second time should not increase notifications count
     const initialCount = caregiverEscalations.length;
 
+    // Running a 3rd time must not increase notification count
     await request(app)
       .post('/api/scheduler/run-check')
       .send({ simulatedNowIso: new Date().toISOString() });
@@ -177,7 +188,7 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     expect(subsequentCount).toBe(initialCount);
   });
 
-  it('TC-05: Caregiver Acknowledgement Workflow', async () => {
+  it('TC-06: Caregiver Acknowledgement Workflow & Audit Logging', async () => {
     const doseId = 'test_ack_dose';
     db.doseLogs.set(doseId, {
       doseId,
@@ -213,13 +224,25 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     expect(latestAudit.actorName).toBe('Nurse Sarah Jenkins');
   });
 
-  it('TC-06: Real Adherence Analytics Calculation from doseLogs', async () => {
-    // Seed exactly 10 dose logs: 8 TAKEN, 1 SKIPPED, 1 UNCONFIRMED_ESCALATED in EVENING slot
+  it('TC-07: Deterministic Daily Dose Materialization', () => {
+    const today = new Date();
+    const dateKey = today.toISOString().split('T')[0];
+
+    db.materializeTodayDoses(patientId, today);
+    const countBefore = Array.from(db.doseLogs.values()).filter((d) => d.patientId === patientId && d.dateKey === dateKey).length;
+    expect(countBefore).toBeGreaterThan(0);
+
+    // Materializing again for the same date must be 100% idempotent
+    db.materializeTodayDoses(patientId, today);
+    const countAfter = Array.from(db.doseLogs.values()).filter((d) => d.patientId === patientId && d.dateKey === dateKey).length;
+    expect(countAfter).toBe(countBefore);
+  });
+
+  it('TC-08: Real Adherence Analytics Calculation from doseLogs', () => {
     const testPatientId = 'patient_analytics_calc_test';
     const today = new Date();
     const dateKey = today.toISOString().split('T')[0];
 
-    // Create a schedule for this test
     const eveningSchedId = 'sched_evening_calc';
     db.schedules.set(eveningSchedId, {
       scheduleId: eveningSchedId,
@@ -287,7 +310,23 @@ describe('ElderSync Verification Test Suite (TC-01 through TC-06)', () => {
     expect(analytics.takenCount).toBe(8);
     expect(analytics.skippedCount).toBe(1);
     expect(analytics.escalatedCount).toBe(1);
-    // Evening slot had both the skipped and escalated doses -> Disruption slot must be EVENING
     expect(analytics.disruptionSlot).toBe('EVENING');
+  });
+
+  it('TC-09: Health Check & System Status (GET /api/health)', async () => {
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('healthy');
+    expect(res.body.service).toBe('ElderSync API');
+    expect(res.body.metrics.patientsCount).toBeGreaterThan(0);
+  });
+
+  it('TC-10: Demo Fast-Forward Simulation & Seeding Endpoint (POST /api/demo/seed)', async () => {
+    const res = await request(app).post('/api/demo/seed');
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.counts.users).toBeGreaterThanOrEqual(3);
+    expect(res.body.counts.patients).toBeGreaterThanOrEqual(1);
+    expect(res.body.counts.medications).toBeGreaterThanOrEqual(2);
   });
 });

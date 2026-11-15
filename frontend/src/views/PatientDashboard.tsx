@@ -4,6 +4,7 @@ import { ScheduleDoseCard } from '../components/ScheduleDoseCard';
 import { SkipReasonModal } from '../components/SkipReasonModal';
 import { AddMedicationModal } from '../components/AddMedicationModal';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { soundService } from '../services/soundService';
 import { AlertCircle, Shield, Plus, Clock, Stethoscope, CheckCircle2 } from 'lucide-react';
 
 interface PatientDashboardProps {
@@ -21,6 +22,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ data, onNavi
   const { patient, todayDoseLogs, careMembers, appointments } = data;
 
   const handleTake = async (doseId: string) => {
+    soundService.playSuccessChime();
     await confirmDose(doseId, 'TAKEN');
   };
 
@@ -37,6 +39,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ data, onNavi
   };
 
   const handleRequestHelp = async () => {
+    soundService.playAlertChime();
     setRequestingHelp(true);
     const res = await requestHelp('Patient pressed the Request Assistance button on their dashboard.');
     setRequestingHelp(false);
@@ -57,7 +60,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ data, onNavi
         <div>
           <div className="flex items-center gap-2 text-sm text-teal-700 font-semibold mb-1">
             <Shield className="w-4 h-4 text-teal-600" />
-            <span>Shared with {activeMembersCount} authorized member{activeMembersCount !== 1 ? 's' : ''} — You control access</span>
+            <span>Shared with {activeMembersCount} authorized member{activeMembersCount !== 1 ? 's' : ''}. You control access.</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-900">
             Welcome back, {patient.name}
