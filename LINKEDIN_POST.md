@@ -32,7 +32,7 @@ Most medication apps stop at passive phone alarms that get swiped away, leaving 
 • Deployment & Infra: Google Cloud Run (Multi-Stage Alpine Docker Container), Cloud Scheduler
 • AI Engineering & Testing: Google Antigravity (10-Phase Iterative Spec Architecture documented in PROMPT_LOG.md), Vitest + Supertest (10 Automated Test Suites, 100% Pass Rate)
 
-📌 *Project Demo:* https://eldersync-api-498163391444.asia-south1.run.app
+📌 *Project Demo:* https://eldersync-catalyst.netlify.app
 📌 *GitHub Repository:* https://github.com/farhanmallik05/eldersync
 
 #Catalyst2026 #MakersNeedMore #MnM #PromptWars #Hackathon #BuildInPublic #Innovation #TechCommunity #GoogleAntigravity #GoogleCloud #HealthcareTech

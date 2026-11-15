@@ -1,9 +1,17 @@
 # ElderSync — Patient-Centred Elderly Care & Adherence Platform
-### PromptWars × Catalyst — Round 2 Antigravity Execution Pack (Vercel Edition)
+### PromptWars × Catalyst — Round 2 Antigravity Execution Pack
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-eldersync--catalyst.netlify.app-0D9488?style=for-the-badge&logo=netlify)](https://eldersync-catalyst.netlify.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/farhanmallik05/eldersync)
+[![Tests Passing](https://img.shields.io/badge/Tests-10%20Passing-16A34A?style=for-the-badge)](./tests/eldersync.test.ts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-0F172A?style=for-the-badge)](./LICENSE)
 
 ![ElderSync Banner](https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80)
 
-**ElderSync** is an autonomous, patient-centred elderly medication adherence and care circle platform engineered for **PromptWars × Catalyst (Round 2)** using **Google Antigravity IDE** and deployed on **Vercel**.
+**ElderSync** is an autonomous, patient-centred elderly medication adherence and care circle platform engineered for **PromptWars × Catalyst (Round 2)** using **Google Antigravity IDE**.
+
+🔗 **Live Application URL:** [https://eldersync-catalyst.netlify.app](https://eldersync-catalyst.netlify.app)  
+💻 **Public GitHub Repository:** [https://github.com/farhanmallik05/eldersync](https://github.com/farhanmallik05/eldersync)
 
 ---
 
