@@ -9,6 +9,7 @@ import {
   Medication,
   Schedule,
   DoseLog,
+  DoseStatus,
   Appointment,
   NotificationRecord,
   AuditLog,
@@ -17,10 +18,22 @@ import {
 
 export const PASSCODE_PEPPER = process.env.PASSCODE_PEPPER || 'eldersync-catalyst-r2-salt-2026';
 
+/**
+ * Computes a salted SHA-256 hash for single-use invitation passcodes.
+ *
+ * @param passcode - Plain numeric 6-digit passcode
+ * @returns Cryptographic hexadecimal hash string
+ */
 export function hashPasscode(passcode: string): string {
   return crypto.createHash('sha256').update(passcode + PASSCODE_PEPPER).digest('hex');
 }
 
+/**
+ * Maps a 24-hour time string ("HH:MM") to a patient-friendly time period.
+ *
+ * @param timeOfDay - Time string in "HH:MM" format
+ * @returns TimeOfDayPeriod ('MORNING' | 'AFTERNOON' | 'EVENING' | 'NIGHT')
+ */
 export function getTimePeriod(timeOfDay: string): TimeOfDayPeriod {
   const [hour] = timeOfDay.split(':').map(Number);
   if (hour >= 5 && hour < 12) return 'MORNING';
@@ -29,6 +42,12 @@ export function getTimePeriod(timeOfDay: string): TimeOfDayPeriod {
   return 'NIGHT';
 }
 
+/**
+ * Formats a Date object into an ISO date key ("YYYY-MM-DD").
+ *
+ * @param date - Optional JavaScript Date instance (defaults to current time)
+ * @returns Date string in "YYYY-MM-DD" format
+ */
 export function getTodayDateKey(date = new Date()): string {
   return date.toISOString().split('T')[0];
 }
@@ -197,7 +216,7 @@ class DatabaseStore {
         const graceDeadlineAt = new Date(new Date(scheduledAt).getTime() + sched.gracePeriodMinutes * 60000).toISOString();
 
         // Simulate 85% adherence pattern
-        let status: any = 'TAKEN';
+        let status: DoseStatus = 'TAKEN';
         let confirmedAt = new Date(new Date(scheduledAt).getTime() + 120000).toISOString();
         if (i === 2 && sched.periodLabel === 'EVENING') {
           status = 'SKIPPED';

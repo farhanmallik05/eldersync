@@ -3,10 +3,14 @@ import { db } from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requireCareMemberOrOwner, requirePermission } from '../middleware/rbac.js';
 import { CreateAppointmentSchema, Appointment } from '../types/index.js';
+import { sanitizeString } from '../utils/sanitize.js';
 
 const router = Router();
 
-// List patient appointments
+/**
+ * GET /api/patients/:patientId/appointments
+ * Retrieves list of scheduled doctor appointments for the patient.
+ */
 router.get(
   '/:patientId/appointments',
   authMiddleware,
@@ -21,7 +25,10 @@ router.get(
   }
 );
 
-// Add new doctor appointment
+/**
+ * POST /api/patients/:patientId/appointments
+ * Books a new doctor appointment with strict RBAC permission check and input sanitization.
+ */
 router.post(
   '/:patientId/appointments',
   authMiddleware,
@@ -43,11 +50,11 @@ router.post(
     const appointment: Appointment = {
       appointmentId,
       patientId,
-      doctorName,
-      specialty,
-      location,
+      doctorName: sanitizeString(doctorName, 150),
+      specialty: sanitizeString(specialty, 150),
+      location: sanitizeString(location, 250),
       scheduledAt,
-      notes: notes || '',
+      notes: notes ? sanitizeString(notes, 1000) : '',
       reminderSent: false,
       status: 'UPCOMING',
       createdAt: nowIso,

@@ -1,6 +1,12 @@
 import { db } from '../config/database.js';
 import { AdherenceAnalytics, TimeOfDayPeriod } from '../types/index.js';
 
+/**
+ * Calculates 7-day adherence rate, slot-level disruption analysis, and average confirmation delay.
+ *
+ * @param patientId - Patient identifier
+ * @returns AdherenceAnalytics object containing percentage rate, counts, and disruption slot
+ */
 export function calculateAdherenceAnalytics(patientId: string): AdherenceAnalytics {
   const allLogs = Array.from(db.doseLogs.values()).filter((l) => l.patientId === patientId);
 

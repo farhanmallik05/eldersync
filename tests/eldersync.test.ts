@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import app from '../backend/src/server.js';
-import { db, hashPasscode } from '../backend/src/config/database.js';
+import { db, hashPasscode, getTimePeriod, getTodayDateKey } from '../backend/src/config/database.js';
 import { calculateAdherenceAnalytics } from '../backend/src/services/analyticsService.js';
 
-describe('ElderSync Quality Gates (TC-01 through TC-10)', () => {
+describe('ElderSync Enterprise Quality Gates (TC-01 through TC-16)', () => {
   const patientId = 'patient_robert_vance';
   const patientToken = 'Bearer demo-patient-token';
   const caregiverToken = 'Bearer demo-caregiver-token';
@@ -328,5 +328,173 @@ describe('ElderSync Quality Gates (TC-01 through TC-10)', () => {
     expect(res.body.counts.users).toBeGreaterThanOrEqual(3);
     expect(res.body.counts.patients).toBeGreaterThanOrEqual(1);
     expect(res.body.counts.medications).toBeGreaterThanOrEqual(2);
+  });
+
+  it('TC-11: Patient Settings Update & Autonomy Propagation (PATCH /api/patients/:patientId)', async () => {
+    const patchRes = await request(app)
+      .patch(`/api/patients/${patientId}`)
+      .set('Authorization', patientToken)
+      .send({
+        emergencyPhone: '+1 (555) 999-1234',
+        gracePeriodMinutes: 5,
+        highContrastDefault: true,
+      });
+
+    expect(patchRes.status).toBe(200);
+    expect(patchRes.body.emergencyPhone).toBe('+1 (555) 999-1234');
+    expect(patchRes.body.gracePeriodMinutes).toBe(5);
+    expect(patchRes.body.highContrastDefault).toBe(true);
+
+    // Verify non-owner caregiver cannot patch patient autonomy settings (Must return 403)
+    const unauthorizedRes = await request(app)
+      .patch(`/api/patients/${patientId}`)
+      .set('Authorization', caregiverToken)
+      .send({ gracePeriodMinutes: 10 });
+
+    expect(unauthorizedRes.status).toBe(403);
+    expect(unauthorizedRes.body.error).toMatch(/strictly reserved for the elderly patient owner/i);
+  });
+
+  it('TC-12: Strict Authorization Boundaries on Dose State Transitions', async () => {
+    const doseId = 'test_auth_boundary_dose';
+    db.doseLogs.set(doseId, {
+      doseId,
+      patientId,
+      scheduleId: 'sched_test',
+      medicineId: 'med_lisinopril',
+      medicineName: 'Lisinopril',
+      dosage: '10mg',
+      dateKey: new Date().toISOString().split('T')[0],
+      scheduledAt: new Date().toISOString(),
+      graceDeadlineAt: new Date().toISOString(),
+      status: 'SCHEDULED',
+    });
+
+    // Unrelated user with no membership in patient Robert Vance's care circle
+    const outsiderToken = 'Bearer outsider-user-token';
+
+    const outsiderConfirm = await request(app)
+      .post(`/api/doses/${doseId}/confirm`)
+      .set('Authorization', outsiderToken)
+      .send({ status: 'TAKEN' });
+
+    expect(outsiderConfirm.status).toBe(403);
+    expect(outsiderConfirm.body.error).toMatch(/forbidden/i);
+
+    const outsiderAck = await request(app)
+      .post(`/api/doses/${doseId}/acknowledge`)
+      .set('Authorization', outsiderToken)
+      .send({ acknowledgementNote: 'Unauthorized ack attempt' });
+
+    expect(outsiderAck.status).toBe(403);
+    expect(outsiderAck.body.error).toMatch(/forbidden/i);
+  });
+
+  it('TC-13: Malicious Input & Stored XSS Neutralization', async () => {
+    const doseId = 'test_xss_sanitization_dose';
+    db.doseLogs.set(doseId, {
+      doseId,
+      patientId,
+      scheduleId: 'sched_test',
+      medicineId: 'med_test',
+      medicineName: 'Test Med',
+      dosage: '10mg',
+      dateKey: new Date().toISOString().split('T')[0],
+      scheduledAt: new Date().toISOString(),
+      graceDeadlineAt: new Date().toISOString(),
+      status: 'SCHEDULED',
+    });
+
+    const maliciousPayload = '<script>alert("pwned")</script>Took with breakfast <iframe src="evil.com"></iframe>';
+    const res = await request(app)
+      .post(`/api/doses/${doseId}/confirm`)
+      .set('Authorization', patientToken)
+      .send({
+        status: 'TAKEN',
+        patientNote: maliciousPayload,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.patientNote).not.toContain('<script>');
+    expect(res.body.patientNote).not.toContain('<iframe');
+    expect(res.body.patientNote).toContain('Took with breakfast');
+
+    // Verify appointment input sanitization
+    const apptRes = await request(app)
+      .post(`/api/patients/${patientId}/appointments`)
+      .set('Authorization', patientToken)
+      .send({
+        doctorName: '<script>evil()</script>Dr. Sarah Connor',
+        specialty: 'Cardiology',
+        location: 'Building B <img src=x onerror=alert(1)>',
+        scheduledAt: '2026-11-20T10:00:00.000Z',
+        notes: '<a href="javascript:steal()">Notes</a> Regular checkup',
+      });
+
+    expect(apptRes.status).toBe(201);
+    expect(apptRes.body.doctorName).not.toContain('<script>');
+    expect(apptRes.body.doctorName).toBe('Dr. Sarah Connor');
+    expect(apptRes.body.location).not.toContain('onerror');
+    expect(apptRes.body.notes).not.toContain('javascript:');
+  });
+
+  it('TC-14: Boundary Conditions & Time Period Classification Resilience', async () => {
+    expect(getTimePeriod('00:00')).toBe('NIGHT');
+    expect(getTimePeriod('04:59')).toBe('NIGHT');
+    expect(getTimePeriod('05:00')).toBe('MORNING');
+    expect(getTimePeriod('11:59')).toBe('MORNING');
+    expect(getTimePeriod('12:00')).toBe('AFTERNOON');
+    expect(getTimePeriod('16:59')).toBe('AFTERNOON');
+    expect(getTimePeriod('17:00')).toBe('EVENING');
+    expect(getTimePeriod('20:59')).toBe('EVENING');
+    expect(getTimePeriod('21:00')).toBe('NIGHT');
+    expect(getTimePeriod('23:59')).toBe('NIGHT');
+
+    // Leap day date key generation resilience
+    const leapDay = new Date(Date.UTC(2028, 1, 29, 12, 0, 0));
+    expect(getTodayDateKey(leapDay)).toBe('2028-02-29');
+  });
+
+  it('TC-15: OWASP Security Headers & CORS Enforcement', async () => {
+    const res = await request(app)
+      .get('/api/health')
+      .set('Origin', 'https://eldersync-catalyst.netlify.app');
+    expect(res.status).toBe(200);
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBeDefined();
+    expect(res.headers['access-control-allow-origin']).toBe('https://eldersync-catalyst.netlify.app');
+  });
+
+  it('TC-16: Concurrent Requests & State Machine Invariance', async () => {
+    const concurrentDoseId = 'test_concurrent_dose';
+    db.doseLogs.set(concurrentDoseId, {
+      doseId: concurrentDoseId,
+      patientId,
+      scheduleId: 'sched_concurrent',
+      medicineId: 'med_lisinopril',
+      medicineName: 'Lisinopril',
+      dosage: '10mg',
+      dateKey: new Date().toISOString().split('T')[0],
+      scheduledAt: new Date().toISOString(),
+      graceDeadlineAt: new Date().toISOString(),
+      status: 'SCHEDULED',
+    });
+
+    // Fire 5 concurrent confirmation requests
+    const promises = Array.from({ length: 5 }, () =>
+      request(app)
+        .post(`/api/doses/${concurrentDoseId}/confirm`)
+        .set('Authorization', patientToken)
+        .send({ status: 'TAKEN' })
+    );
+
+    const results = await Promise.all(promises);
+    results.forEach((r) => {
+      expect(r.status).toBe(200);
+      expect(r.body.status).toBe('TAKEN');
+    });
+
+    const finalDose = db.doseLogs.get(concurrentDoseId);
+    expect(finalDose?.status).toBe('TAKEN');
   });
 });

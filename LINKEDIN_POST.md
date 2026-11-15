@@ -29,8 +29,8 @@ Most medication apps stop at passive phone alarms that get swiped away, leaving 
 💻 *Tech Stack:*
 • Frontend: React 18, TypeScript, Tailwind CSS, Vite, Lucide Icons, Web Audio API
 • Backend: Node.js, Express, Zod, Rate Limiting, Idempotent Outbox Engine
-• Deployment & Infra: Google Cloud Run (Multi-Stage Alpine Docker Container), Cloud Scheduler
-• AI Engineering & Testing: Google Antigravity (10-Phase Iterative Spec Architecture documented in PROMPT_LOG.md), Vitest + Supertest (10 Automated Test Suites, 100% Pass Rate)
+• Deployment & Infra: Netlify Serverless Cloud Deployment & Express Unified Architecture
+• AI Engineering & Testing: Google Antigravity (10-Phase Iterative Spec Architecture documented in PROMPT_LOG.md), Vitest + Supertest (16 Automated Quality Gates, 100% Pass Rate)
 
 📌 *Project Demo:* https://eldersync-catalyst.netlify.app
 📌 *GitHub Repository:* https://github.com/farhanmallik05/eldersync

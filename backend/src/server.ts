@@ -79,10 +79,16 @@ app.get('*', (req, res, next) => {
   });
 });
 
-// Global Error Handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+// Global Error Handler with typed parameters
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('[GlobalErrorHandler]', err);
-  res.status(500).json({ error: 'Internal Server Error', message: err.message });
+  const status = typeof (err as unknown as { status?: number }).status === 'number'
+    ? (err as unknown as { status: number }).status
+    : 500;
+  res.status(status).json({
+    error: status === 400 ? 'Bad Request' : 'Internal Server Error',
+    message: err.message || 'An unexpected server error occurred',
+  });
 });
 
 if (process.env.NODE_ENV !== 'test') {

@@ -151,3 +151,36 @@ export interface WorkspaceData {
   auditLogs: AuditLog[];
   analytics: AdherenceAnalytics;
 }
+
+export interface CreateMedicationPayload {
+  name: string;
+  dosage: string;
+  instructions: string;
+  timesOfDay: string[];
+  gracePeriodMinutes?: number;
+}
+
+export interface CreateAppointmentPayload {
+  doctorName: string;
+  specialty: string;
+  location: string;
+  scheduledAt: string;
+  notes?: string;
+}
+
+export interface SchedulerCheckResult {
+  success: boolean;
+  simulatedNow?: string;
+  remindersSent?: number;
+  escalationsSent?: number;
+  appointmentRemindersSent?: number;
+  message?: string;
+}
+
+export interface UpdatePatientPayload {
+  name?: string;
+  age?: number;
+  emergencyPhone?: string;
+  gracePeriodMinutes?: number;
+  highContrastDefault?: boolean;
+}

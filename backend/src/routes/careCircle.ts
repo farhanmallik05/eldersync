@@ -33,7 +33,11 @@ function secureHashCompare(storedHash: string, candidateHash: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-// Patient generates a 6-digit invitation passcode with 15-minute TTL
+/**
+ * POST /api/patients/:patientId/invitations
+ * Generates a cryptographically random, single-use 6-digit invitation passcode with 15-minute TTL.
+ * Enforces patient ownership check.
+ */
 router.post(
   '/patients/:patientId/invitations',
   authMiddleware,
@@ -94,7 +98,11 @@ router.post(
   }
 );
 
-// Caregiver or Family Member joins using 6-digit passcode (Rate-Limited & Timing-Safe)
+/**
+ * POST /api/care-circle/join
+ * Caregiver or Family Member joins using 6-digit passcode.
+ * Protected by strict rate-limiting (max 5 attempts/15m) and timing-safe cryptographic comparison.
+ */
 router.post('/care-circle/join', joinRateLimiter, authMiddleware, (req, res) => {
   const parseResult = JoinCareCircleSchema.safeParse(req.body);
   if (!parseResult.success) {

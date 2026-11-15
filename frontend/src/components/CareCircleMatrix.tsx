@@ -46,8 +46,8 @@ export const CareCircleMatrix: React.FC<CareCircleMatrixProps> = ({ careMembers,
       setGeneratedPasscode(result.passcode);
       setExpiresAt(result.expiresAt);
       setCopied(false);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      console.error('[CareCircleMatrix] Failed to generate passcode:', err);
     } finally {
       setGenerating(false);
     }

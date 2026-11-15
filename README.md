@@ -3,7 +3,8 @@
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-eldersync--catalyst.netlify.app-0D9488?style=for-the-badge&logo=netlify)](https://eldersync-catalyst.netlify.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/farhanmallik05/eldersync)
-[![Tests Passing](https://img.shields.io/badge/Tests-10%20Passing-16A34A?style=for-the-badge)](./tests/eldersync.test.ts)
+[![Tests Passing](https://img.shields.io/badge/Tests-16%20Passing-16A34A?style=for-the-badge)](./tests/eldersync.test.ts)
+[![TypeScript: Strict](https://img.shields.io/badge/TypeScript-100%25%20Strict-3178C6?style=for-the-badge&logo=typescript)](./tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0F172A?style=for-the-badge)](./LICENSE)
 
 ![ElderSync Banner](https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&w=1200&q=80)
@@ -78,20 +79,19 @@ flowchart TD
 |---|---|---|---|
 | **Frontend** | React + Vite + TypeScript | React 18, Vite 5 | Fast HMR, lightweight bundle size, strict typing |
 | **Styling** | Tailwind CSS + Lucide Icons | Tailwind v3 | High-contrast WCAG AAA compliance, >=56px touch controls |
-| **Backend** | Node.js + Express on Vercel | Node 20 LTS, Express 4 | Serverless execution, sub-second startup, REST endpoints |
-| **Validation** | Zod | Zod 3.23 | Strict runtime payload schema validation |
-| **Security** | `express-rate-limit`, `crypto` | Built-in | Constant-time hash checks, brute-force rate-limiting |
-| **Automation** | Vercel Cron Jobs | Native `vercel.json` | 2-minute recurring missed-dose evaluation |
-| **Testing** | Vitest + Supertest | Vitest 1.6 | 10 automated test suites with 100% pass rate |
+| **Backend** | Node.js + Express on Netlify/Vercel | Node 20 LTS, Express 4 | Serverless execution, sub-second startup, REST endpoints |
+| **Validation & Sanitization** | Zod + Built-in XSS Sanitizer | Zod 3.23 | Strict runtime payload schema validation & input sanitization |
+| **Security** | `express-rate-limit`, `helmet`, `crypto` | Built-in | Constant-time hash checks, brute-force rate-limiting, OWASP headers |
+| **Testing** | Vitest + Supertest | Vitest 1.6 | 16 automated test suites with 100% pass rate |
 
 ---
 
-## 🧪 Automated Testing Matrix (TC-01 to TC-10)
+## 🧪 Automated Testing Matrix (TC-01 to TC-16)
 
 ElderSync includes an exhaustive automated test suite in `tests/eldersync.test.ts`:
 
 ```bash
-# Run all automated tests
+# Run all 16 automated quality gates
 npm test
 ```
 
@@ -103,10 +103,16 @@ npm test
 | **TC-04** | Patient Autonomy Permission Revocation | Revoked caregiver mutating medications receives `403 Forbidden`. |
 | **TC-05** | State Machine Transitions & Idempotency | Consecutive scheduler runs past grace deadline dispatch exactly 1 escalation email. |
 | **TC-06** | Caregiver Closed-Loop Acknowledgement | Caregiver records note, updates status to `TAKEN`/`ACKNOWLEDGED`, writes audit log. |
-| **TC-07** | Deterministic Dose Materialization | Daily dose materialization is 100% idempotent; `{scheduleId}_{YYYY-MM-DD}` prevents duplication. |
+| **TC-07** | Senior Accessibility Defaults & Touch Targets | Minimum 56px touch targets, font scaling classes, and contrast compliance. |
 | **TC-08** | Real Adherence Analytics Calculation | Accurately calculates 7-day adherence %, counts, and disruption window from `doseLogs`. |
-| **TC-09** | Health Check & System Status | `GET /api/health` returns `200 OK` with status `healthy` and metrics. |
+| **TC-09** | Health Check & System Status | `GET /api/health` returns `200 OK` with status `healthy` and store metrics. |
 | **TC-10** | Demo Fast-Forward Simulation & Seeding | `POST /api/demo/seed` idempotently resets and seeds full demo workspace. |
+| **TC-11** | Patient Settings Update & Autonomy Propagation | Validates `PATCH /api/patients/:patientId` with owner enforcement. |
+| **TC-12** | Strict Authorization Boundaries on Doses | Non-care-circle outsiders receive `403 Forbidden` attempting dose updates. |
+| **TC-13** | Malicious Input & Stored XSS Neutralization | Strips script/iframe/onerror payloads from user notes and appointments. |
+| **TC-14** | Timezone & Date Rollover Boundary Resilience | Validates period classification across all boundary hours and leap days. |
+| **TC-15** | OWASP Security Headers & CORS Enforcement | Validates `nosniff`, `X-Frame-Options`, and origin-matched CORS headers. |
+| **TC-16** | Concurrent Requests & State Invariance | 5 simultaneous dose confirmation requests complete idempotently with 0 corruption. |
 
 ---
 

@@ -2,6 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { db } from '../config/database.js';
 import { UserRole } from '../types/index.js';
 
+/**
+ * Representation of an authenticated user injected onto Express Request.
+ */
 export interface AuthenticatedUser {
   uid: string;
   email: string;
@@ -17,6 +20,14 @@ declare global {
   }
 }
 
+/**
+ * Bearer token authentication middleware for ElderSync API.
+ * Validates incoming Authorization header and populates req.user.
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ * @param next - Express NextFunction
+ */
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 

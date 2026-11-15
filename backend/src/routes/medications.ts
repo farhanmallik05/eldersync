@@ -3,10 +3,14 @@ import { db, getTimePeriod, getTodayDateKey } from '../config/database.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requirePermission } from '../middleware/rbac.js';
 import { CreateMedicationSchema, UpdateMedicationSchema } from '../types/index.js';
+import { sanitizeString } from '../utils/sanitize.js';
 
 const router = Router({ mergeParams: true });
 
-// Create Medication & Recurring Schedules
+/**
+ * POST /api/patients/:patientId/medications
+ * Creates a new medication record and automatically materializes corresponding schedules and today's dose logs.
+ */
 router.post(
   '/:patientId/medications',
   authMiddleware,
@@ -25,12 +29,16 @@ router.post(
     const medicineId = `med_${Date.now()}`;
     const nowIso = new Date().toISOString();
 
+    const sanitizedName = sanitizeString(name, 200);
+    const sanitizedDosage = sanitizeString(dosage, 100);
+    const sanitizedInstructions = sanitizeString(instructions, 1000);
+
     const medication = {
       medicineId,
       patientId,
-      name,
-      dosage,
-      instructions,
+      name: sanitizedName,
+      dosage: sanitizedDosage,
+      instructions: sanitizedInstructions,
       active: true,
       createdByUid: req.user!.uid,
       updatedAt: nowIso,
@@ -45,9 +53,9 @@ router.post(
         scheduleId,
         patientId,
         medicineId,
-        medicineName: name,
-        dosage,
-        instructions,
+        medicineName: sanitizedName,
+        dosage: sanitizedDosage,
+        instructions: sanitizedInstructions,
         timeOfDay: time,
         periodLabel: getTimePeriod(time),
         gracePeriodMinutes: gracePeriodMinutes || patient.gracePeriodMinutes || 3,
@@ -95,7 +103,10 @@ router.post(
   }
 );
 
-// Update Medication
+/**
+ * PUT /api/patients/:patientId/medications/:medicineId
+ * Updates medication details and cascades changes to associated schedules.
+ */
 router.put(
   '/:patientId/medications/:medicineId',
   authMiddleware,
@@ -113,9 +124,9 @@ router.put(
     }
 
     const { name, dosage, instructions, active } = parseResult.data;
-    if (name) med.name = name;
-    if (dosage) med.dosage = dosage;
-    if (instructions) med.instructions = instructions;
+    if (name) med.name = sanitizeString(name, 200);
+    if (dosage) med.dosage = sanitizeString(dosage, 100);
+    if (instructions) med.instructions = sanitizeString(instructions, 1000);
     if (typeof active === 'boolean') med.active = active;
     med.updatedAt = new Date().toISOString();
 
@@ -124,9 +135,9 @@ router.put(
     // Update schedules
     db.schedules.forEach((sched) => {
       if (sched.medicineId === medicineId) {
-        if (name) sched.medicineName = name;
-        if (dosage) sched.dosage = dosage;
-        if (instructions) sched.instructions = instructions;
+        if (name) sched.medicineName = med.name;
+        if (dosage) sched.dosage = med.dosage;
+        if (instructions) sched.instructions = med.instructions;
         if (typeof active === 'boolean') sched.active = active;
       }
     });
@@ -145,7 +156,10 @@ router.put(
   }
 );
 
-// Soft delete / deactivate medication
+/**
+ * DELETE /api/patients/:patientId/medications/:medicineId
+ * Soft-deactivates medication prescription and disables associated schedules.
+ */
 router.delete(
   '/:patientId/medications/:medicineId',
   authMiddleware,

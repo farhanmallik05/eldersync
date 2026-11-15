@@ -165,6 +165,14 @@ export const CreatePatientSchema = z.object({
   highContrastDefault: z.boolean().optional().default(false),
 });
 
+export const UpdatePatientSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters').optional(),
+  age: z.number().int().min(1, 'Age must be valid').optional(),
+  emergencyPhone: z.string().min(5, 'Valid emergency phone required').optional(),
+  gracePeriodMinutes: z.number().int().min(1).max(120).optional(),
+  highContrastDefault: z.boolean().optional(),
+});
+
 export const CreateMedicationSchema = z.object({
   name: z.string().min(2, 'Medication name required'),
   dosage: z.string().min(1, 'Dosage required'),

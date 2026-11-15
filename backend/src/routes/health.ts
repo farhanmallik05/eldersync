@@ -3,6 +3,10 @@ import { db } from '../config/database.js';
 
 const router = Router();
 
+/**
+ * GET /api/health
+ * Comprehensive operational health probe returning service uptime, store metrics, and email configuration status.
+ */
 router.get('/', (req, res) => {
   res.status(200).json({
     status: 'healthy',

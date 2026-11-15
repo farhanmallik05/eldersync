@@ -5,13 +5,18 @@ import { emailService } from '../services/emailService.js';
 
 const router = Router();
 
-// Idempotent cron processor & Judge live demo trigger
+/**
+ * POST /api/scheduler/run-check
+ * Idempotent cron processor & evaluator live demo trigger.
+ * Evaluates pending doses against grace periods, triggers automated reminders and caregiver escalations.
+ */
 router.post('/run-check', async (req, res) => {
-  const parseResult = SchedulerCheckSchema.safeParse(req.body);
-  const now = parseResult.success && parseResult.data?.simulatedNowIso
-    ? new Date(parseResult.data.simulatedNowIso)
-    : new Date();
-  const filterPatientId = parseResult.success ? parseResult.data?.patientId : undefined;
+  try {
+    const parseResult = SchedulerCheckSchema.safeParse(req.body);
+    const now = parseResult.success && parseResult.data?.simulatedNowIso
+      ? new Date(parseResult.data.simulatedNowIso)
+      : new Date();
+    const filterPatientId = parseResult.success ? parseResult.data?.patientId : undefined;
 
   let remindersSent = 0;
   let escalationsSent = 0;
@@ -153,6 +158,11 @@ router.post('/run-check', async (req, res) => {
     appointmentRemindersSent,
     message: `Scheduler check complete at ${now.toISOString()}. Reminders: ${remindersSent}, Escalations: ${escalationsSent}.`,
   });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[SchedulerCheck] Error:', err);
+    res.status(500).json({ error: 'Failed to execute scheduler check', message: errorMessage });
+  }
 });
 
 export default router;

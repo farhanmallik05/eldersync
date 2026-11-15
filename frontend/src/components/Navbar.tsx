@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const result = await runSchedulerCheck(futureTime);
     setRunningCron(false);
     if (result) {
-      setCronFeedback(`Processed: ${result.remindersSent} reminders, ${result.escalationsSent} escalations`);
+      setCronFeedback(`Processed: ${result.remindersSent ?? 0} reminders, ${result.escalationsSent ?? 0} escalations`);
       setTimeout(() => setCronFeedback(null), 5000);
     }
   };

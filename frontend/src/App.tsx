@@ -64,8 +64,8 @@ export const App: React.FC = () => {
         openNotificationLog={() => setOutboxModalOpen(true)}
       />
 
-      {/* Main Workspace Canvas */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      {/* Main Workspace Canvas with semantic ID for accessibility skip links */}
+      <main id="main-content" className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1">
         {data && (
           <>
             {activeTab === 'schedule' && (

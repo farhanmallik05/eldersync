@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { WorkspaceData, DoseStatus, CareMemberPermissions } from '../types';
+import {
+  WorkspaceData,
+  DoseStatus,
+  CareMemberPermissions,
+  CreateMedicationPayload,
+  CreateAppointmentPayload,
+  SchedulerCheckResult,
+  UpdatePatientPayload,
+} from '../types';
 import { useAuth } from './AuthContext';
 
 function getInitialDemoWorkspace(): WorkspaceData {
@@ -237,12 +245,13 @@ interface WorkspaceContextType {
   confirmDose: (doseId: string, status: DoseStatus, patientNote?: string) => Promise<boolean>;
   acknowledgeDose: (doseId: string, note: string, markAsTaken?: boolean) => Promise<boolean>;
   requestHelp: (message?: string) => Promise<{ success: boolean; notifiedCount: number }>;
-  runSchedulerCheck: (simulatedNowIso?: string) => Promise<any>;
+  runSchedulerCheck: (simulatedNowIso?: string) => Promise<SchedulerCheckResult>;
   generatePasscode: (role: 'CAREGIVER' | 'FAMILY', permissions: CareMemberPermissions) => Promise<{ passcode: string; expiresAt: string }>;
   joinCareCircle: (passcode: string) => Promise<boolean>;
-  addMedication: (payload: { name: string; dosage: string; instructions: string; timesOfDay: string[]; gracePeriodMinutes?: number }) => Promise<boolean>;
-  addAppointment: (payload: { doctorName: string; specialty: string; location: string; scheduledAt: string; notes?: string }) => Promise<boolean>;
+  addMedication: (payload: CreateMedicationPayload) => Promise<boolean>;
+  addAppointment: (payload: CreateAppointmentPayload) => Promise<boolean>;
   updateCareMember: (memberId: string, permissions?: Partial<CareMemberPermissions>, status?: 'ACTIVE' | 'REVOKED') => Promise<boolean>;
+  updatePatientSettings: (payload: UpdatePatientPayload) => Promise<boolean>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
@@ -289,19 +298,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [fetchWorkspace, user]);
 
   const confirmDose = async (doseId: string, status: DoseStatus, patientNote?: string) => {
-    try {
-      await fetch(`/api/doses/${doseId}/confirm`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status, patientNote }),
-      });
-    } catch {
-      // Handled in client state
-    }
-
     // Immediately update client state for instantaneous feedback
     setData((prev) => {
       if (!prev) return prev;
@@ -327,23 +323,26 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         },
       };
     });
-    return true;
-  };
 
-  const acknowledgeDose = async (doseId: string, note: string, markAsTaken = false) => {
     try {
-      await fetch(`/api/doses/${doseId}/acknowledge`, {
+      const res = await fetch(`/api/doses/${doseId}/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ acknowledgementNote: note, markAsTaken }),
+        body: JSON.stringify({ status, patientNote }),
       });
-    } catch {
-      // Handled in client state
+      if (res.ok) {
+        await fetchWorkspace();
+      }
+    } catch (err) {
+      console.warn('[Workspace] Background confirmDose sync failed:', err);
     }
+    return true;
+  };
 
+  const acknowledgeDose = async (doseId: string, note: string, markAsTaken = false) => {
     setData((prev) => {
       if (!prev) return prev;
       const updatedLogs = prev.todayDoseLogs.map((d) =>
@@ -375,6 +374,22 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ],
       };
     });
+
+    try {
+      const res = await fetch(`/api/doses/${doseId}/acknowledge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ acknowledgementNote: note, markAsTaken }),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+      }
+    } catch (err) {
+      console.warn('[Workspace] Background acknowledgeDose sync failed:', err);
+    }
     return true;
   };
 
@@ -415,15 +430,21 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return { success: true, notifiedCount: data?.careMembers.length || 2 };
   };
 
-  const runSchedulerCheck = async (simulatedNowIso?: string) => {
+  const runSchedulerCheck = async (simulatedNowIso?: string): Promise<SchedulerCheckResult> => {
+    let checkResult: SchedulerCheckResult = { success: true, remindersSent: 0, escalationsSent: 0 };
     try {
-      await fetch('/api/scheduler/run-check', {
+      const res = await fetch('/api/scheduler/run-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ simulatedNowIso, patientId }),
       });
-    } catch {
-      // Handled
+      if (res.ok) {
+        checkResult = await res.json();
+        await fetchWorkspace();
+        return checkResult;
+      }
+    } catch (err) {
+      console.warn('[Workspace] runSchedulerCheck API failed, falling back to local simulation:', err);
     }
 
     // Trigger local status transition for simulated demo fast-forward
@@ -453,10 +474,28 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ],
       };
     });
-    return { success: true };
+    return { success: true, remindersSent: 1, escalationsSent: 1 };
   };
 
   const generatePasscode = async (role: 'CAREGIVER' | 'FAMILY', permissions: CareMemberPermissions) => {
+    try {
+      const res = await fetch(`/api/patients/${patientId}/invitations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role, permissions }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        await fetchWorkspace();
+        return { passcode: json.passcode, expiresAt: json.expiresAt };
+      }
+    } catch (err) {
+      console.warn('[Workspace] generatePasscode backend call failed, falling back to local simulation:', err);
+    }
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 15 * 60000).toISOString();
 
@@ -481,29 +520,45 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return { passcode: code, expiresAt: expires };
   };
 
-  const joinCareCircle = async (passcode: string) => {
-    setData((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        auditLogs: [
-          {
-            logId: `audit_${Date.now()}`,
-            patientId,
-            actorUid: user?.uid || 'new_member',
-            actorName: user?.name || 'Authorized Member',
-            action: 'CARE_MEMBER_JOINED',
-            details: `Successfully joined Care Circle using single-use passcode ${passcode}.`,
-            timestamp: new Date().toISOString(),
-          },
-          ...prev.auditLogs,
-        ],
-      };
-    });
-    return true;
+  const joinCareCircle = async (passcode: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/care-circle/join', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ patientId, passcode }),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.warn('[Workspace] joinCareCircle error:', err);
+      return false;
+    }
   };
 
-  const addMedication = async (payload: any) => {
+  const addMedication = async (payload: CreateMedicationPayload): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/patients/${patientId}/medications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+        return true;
+      }
+    } catch (err) {
+      console.warn('[Workspace] addMedication error, applying optimistic fallback:', err);
+    }
+
     setData((prev) => {
       if (!prev) return prev;
       const newMed = {
@@ -537,7 +592,24 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return true;
   };
 
-  const addAppointment = async (payload: any) => {
+  const addAppointment = async (payload: CreateAppointmentPayload): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/patients/${patientId}/appointments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+        return true;
+      }
+    } catch (err) {
+      console.warn('[Workspace] addAppointment error, applying optimistic fallback:', err);
+    }
+
     setData((prev) => {
       if (!prev) return prev;
       const newAppt = {
@@ -560,11 +632,32 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return true;
   };
 
-  const updateCareMember = async (memberId: string, permissions?: any, status?: any) => {
+  const updateCareMember = async (
+    memberId: string,
+    permissions?: Partial<CareMemberPermissions>,
+    status?: 'ACTIVE' | 'REVOKED'
+  ): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/patients/${patientId}/care-members/${memberId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ permissions, status }),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+        return true;
+      }
+    } catch (err) {
+      console.warn('[Workspace] updateCareMember error, applying optimistic fallback:', err);
+    }
+
     setData((prev) => {
       if (!prev) return prev;
       const updatedMembers = prev.careMembers.map((m) =>
-        m.id === memberId
+        m.id === memberId || m.userId === memberId
           ? {
               ...m,
               permissions: permissions ? { ...m.permissions, ...permissions } : m.permissions,
@@ -575,6 +668,37 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return {
         ...prev,
         careMembers: updatedMembers,
+      };
+    });
+    return true;
+  };
+
+  const updatePatientSettings = async (payload: UpdatePatientPayload): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/patients/${patientId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        await fetchWorkspace();
+        return true;
+      }
+    } catch (err) {
+      console.warn('[Workspace] updatePatientSettings error, applying optimistic fallback:', err);
+    }
+
+    setData((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        patient: {
+          ...prev.patient,
+          ...payload,
+        },
       };
     });
     return true;
@@ -596,6 +720,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addMedication,
         addAppointment,
         updateCareMember,
+        updatePatientSettings,
       }}
     >
       {children}

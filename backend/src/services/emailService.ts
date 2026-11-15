@@ -12,6 +12,15 @@ export interface SendEmailOptions {
   html: string;
 }
 
+/**
+ * Resend API email dispatch payload response format.
+ */
+interface ResendApiResponse {
+  id?: string;
+  statusCode?: number;
+  message?: string;
+}
+
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private fromAddress: string;
@@ -36,6 +45,9 @@ export class EmailService {
   /**
    * Idempotently sends transactional email.
    * If a notification with the same idempotencyKey already exists, it is skipped.
+   *
+   * @param options - SendEmailOptions with unique idempotencyKey
+   * @returns Object containing whether the email was newly sent and the persisted record
    */
   public async sendNotification(options: SendEmailOptions): Promise<{ sent: boolean; record: NotificationRecord }> {
     const { idempotencyKey, patientId, recipientEmail, recipientRole, type, subject, html } = options;
@@ -67,14 +79,14 @@ export class EmailService {
         });
 
         if (response.ok) {
-          const data: any = await response.json();
+          const data = (await response.json()) as ResendApiResponse;
           providerMessageId = data.id;
           deliveryStatus = 'SENT';
         } else {
           console.error('[EmailService] Resend API error:', await response.text());
           deliveryStatus = 'FAILED';
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('[EmailService] Resend network error:', err);
         deliveryStatus = 'FAILED';
       }
@@ -90,7 +102,7 @@ export class EmailService {
         });
         providerMessageId = info.messageId;
         deliveryStatus = 'SENT';
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('[EmailService] SMTP error:', err);
         deliveryStatus = 'FAILED';
       }

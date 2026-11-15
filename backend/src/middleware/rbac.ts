@@ -1,8 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../config/database.js';
-import { CareMemberPermissions } from '../types/index.js';
+import { CareMember, CareMemberPermissions } from '../types/index.js';
 
-export function checkPatientAccess(patientId: string, userId: string): { isOwner: boolean; member?: any } {
+/**
+ * Access resolution result for a specific patient and user context.
+ */
+export interface PatientAccessResolution {
+  isOwner: boolean;
+  member?: CareMember;
+}
+
+/**
+ * Validates whether a user is either the patient owner or an active care member.
+ *
+ * @param patientId - Target patient identifier
+ * @param userId - Requesting user identifier
+ * @returns Access resolution object
+ */
+export function checkPatientAccess(patientId: string, userId: string): PatientAccessResolution {
   const patient = db.patients.get(patientId);
   if (!patient) return { isOwner: false };
 
@@ -20,6 +35,12 @@ export function checkPatientAccess(patientId: string, userId: string): { isOwner
   return { isOwner: false };
 }
 
+/**
+ * Express middleware requiring the requesting user to be the direct patient owner.
+ *
+ * @param getPatientId - Callback function to extract target patient ID from Request
+ * @returns Express RequestHandler
+ */
 export function requirePatientOwner(getPatientId: (req: Request) => string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
@@ -39,6 +60,14 @@ export function requirePatientOwner(getPatientId: (req: Request) => string) {
   };
 }
 
+/**
+ * Express middleware enforcing granular permissions for Care Circle members.
+ * Patient owners bypass permission gates automatically.
+ *
+ * @param getPatientId - Callback function to extract target patient ID
+ * @param permissionKey - Required CareMemberPermissions key
+ * @returns Express RequestHandler
+ */
 export function requirePermission(
   getPatientId: (req: Request) => string,
   permissionKey: keyof CareMemberPermissions
@@ -65,6 +94,12 @@ export function requirePermission(
   };
 }
 
+/**
+ * Express middleware requiring the user to be either the patient owner or an active care member.
+ *
+ * @param getPatientId - Callback function to extract target patient ID
+ * @returns Express RequestHandler
+ */
 export function requireCareMemberOrOwner(getPatientId: (req: Request) => string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
