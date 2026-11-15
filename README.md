@@ -149,4 +149,4 @@ Configure the following environment variables in Vercel:
 ---
 
 ## 📄 License
-MIT License. Created by **Farhan Mallick** for PromptWars × Catalyst Round 2.
+MIT License. Created by **Farhan Mallik** for PromptWars × Catalyst Round 2.
