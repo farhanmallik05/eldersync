@@ -36,8 +36,8 @@ ElderSync moves beyond isolated reminders toward accountable, collaborative, and
 
 Special thanks to @Makers Need More (MnM) and the PromptWars × Catalyst team for designing a challenge centered on real-world engineering impact!
 
-🔗 Live Application (Vercel): [INSERT_YOUR_VERCEL_URL]
-💻 Public GitHub Repository (with PROMPT_LOG.md): [INSERT_YOUR_GITHUB_REPO_URL]
+🔗 Live Application (Cloud Run): https://eldersync-api-498163391444.asia-south1.run.app
+💻 Public GitHub Repository (with PROMPT_LOG.md): https://github.com/farhanmallik05/eldersync
 
 #PromptWars #Catalyst #MakersNeedMore #GoogleAntigravity #Vercel #TypeScript #React #HealthcareInnovation #ElderlyCare #FullStack #AIEngineering
 ```
