@@ -1,5 +1,5 @@
-# ElderSync — Master Presentation & Pitch Deck Blueprint
-### PromptWars × Catalyst — Comprehensive Presentation Context & Slide Deck
+# ElderSync: Master Presentation & Pitch Deck Blueprint
+### PromptWars x Catalyst: Comprehensive Presentation Context & Slide Deck
 
 ---
 
@@ -9,7 +9,7 @@
 
 Unlike traditional reminder apps that treat elderly patients as passive objects of medical surveillance or rely on easily ignored local phone notifications, ElderSync establishes a **patient-first sovereignty model**:
 - The senior citizen owns their medical profile, confirms doses through high-contrast, large-touch interfaces ($\ge 56\text{px}$), generates expiring single-use cryptographic passcodes, and dynamically grants or revokes caregiver permissions.
-- In the background, a server-side **deterministic adherence and escalation state machine** continuously monitors adherence against a patient-configured grace window (e.g., 3 minutes for live demo, 5–120 minutes in real-world care routines).
+- In the background, a server-side **deterministic adherence and escalation state machine** continuously monitors adherence against a patient-configured grace window (e.g., 3 minutes for live demo, 5 to 120 minutes in real-world care routines).
 - When a critical dose is unconfirmed past its grace deadline, ElderSync automatically escalates through real transactional email alerts to authorized circle members with **idempotent outbox locks**, preventing panic and ensuring closed-loop accountability without humiliating surveillance.
 
 ```
@@ -59,7 +59,7 @@ ElderSync replaces friction and suspicion with calm, deterministic verification.
 
 ### The Quantitative Crisis
 - **50% Chronic Non-Adherence:** Over 50% of elderly patients do not take prescribed chronic medications as directed (World Health Organization).
-- **$300 Billion Economic Burden:** In the United States alone, avoidable medication non-adherence leads to \$100B–\$300B in preventable hospital readmissions and emergency room visits annually.
+- **$300 Billion Economic Burden:** In the United States alone, avoidable medication non-adherence leads to \$100B to \$300B in preventable hospital readmissions and emergency room visits annually.
 - **125,000 Avoidable Deaths/Year:** Medication failure represents one of the leading preventable causes of mortality in seniors over 65.
 
 ### The Behavioral Gap in Existing Tech
@@ -87,8 +87,8 @@ ElderSync inverts traditional digital health hierarchies. The senior citizen is 
 
 ### The 4 Pillars of ElderSync's USP
 1. **Autonomous Patient Dignity:** Seniors confirm their own medications with large, clear tactile controls (`Taken`, `Skip for Now`, `Unable to Take`).
-2. **Deterministic Server-Side Verification:** Dose tracking happens on the backend server—not on browser timers or phone alarms. If the phone runs out of battery, the backend still evaluates grace deadlines.
-3. **Closed-Loop Collaborative Care Circle:** Caregivers acknowledge escalations with clinical notes ("Called Papa—he took it with lunch, marking confirmed"), synchronizing the family in real time.
+2. **Deterministic Server-Side Verification:** Dose tracking happens on the backend server, not on browser timers or phone alarms. If the phone runs out of battery, the backend still evaluates grace deadlines.
+3. **Closed-Loop Collaborative Care Circle:** Caregivers acknowledge escalations with clinical notes ("Called Papa: he took it with lunch, marking confirmed"), synchronizing the family in real time.
 4. **Idempotent Multi-Channel Outbox:** Every email dispatch is uniquely locked, ensuring zero duplicate panic emails even during distributed cron retries.
 
 ---
@@ -153,7 +153,7 @@ A dose log moves through an immutable, deterministic finite state machine (FSM):
 
 ### Server-Side Grace Window Logic
 - **Scheduled Time ($T_0$):** Time medication is scheduled (e.g., 09:00 AM).
-- **Grace Period ($\Delta t$):** Patient-configured autonomy buffer (3 minutes for demo; 15–60 minutes in production).
+- **Grace Period ($\Delta t$):** Patient-configured autonomy buffer (3 minutes for demo; 15 to 60 minutes in production).
 - **Grace Deadline ($T_{\text{deadline}} = T_0 + \Delta t$):** The exact threshold after which silence transitions to escalation.
 - **Idempotency Key:** `esc_${doseId}_${caregiverUid}` locks the outbox so that repeated cron invocations or judge evaluation triggers never duplicate emails.
 
@@ -175,7 +175,7 @@ Rather than requiring elderly patients to manage complex OAuth screens or share 
 ## 8. Senior-First Ergonomics & Accessibility (WCAG AAA)
 
 ### The 4 Pillars of Senior Ergonomics
-1. **$\ge 56\text{px}$ Interactive Touch Targets:** All action controls exceed Apple/Android accessibility guidelines to accommodate resting tremors, arthritic fingers, and reduced motor precision.
+1. **$\ge 56\text{px}$ Interactive Touch Targets:** All action controls exceed Apple and Android accessibility guidelines to accommodate resting tremors, arthritic fingers, and reduced motor precision.
 2. **WCAG AAA Contrast ($\ge 7:1$):** High-contrast mode pairs deep navy surfaces (`#0F172A`) with emerald verification badges (`#16A34A`), amber alert cues (`#D97706`), and crisp clinical white cards (`#FFFFFF`).
 3. **Accessibility Scaler ($A / A+ / A++$):** Real-time typography scaling allows text size to increase up to 125% without layout breakage or horizontal scrolling.
 4. **Web Audio API Feedback:** Actions are paired with dual-frequency synthesis chimes ($520\text{Hz} \to 660\text{Hz}$) to provide immediate acoustic confirmation for visually impaired seniors.
@@ -279,33 +279,33 @@ ElderSync does not display mock analytics. The **Adherence Engine** dynamically 
 
 ## 13. 5-Act Live Pitch & Demo Script for Hackathon Judges
 
-### Act 1: The Problem & The Autonomous Patient (Time: 0:00 – 1:30)
+### Act 1: The Problem & The Autonomous Patient (Time: 0:00 to 1:30)
 - **Visual:** Screen displays `http://localhost:8000` with Elderly Patient Robert Vance (74) logged in.
 - **Speaker:** *"Judges, meet Robert. He lives independently and takes Metformin for his diabetes. Like millions of seniors, Robert doesn't want to feel like a burden to his children. Notice ElderSync's interface: no tiny dropdowns, no confusing navigation. High-contrast typography, large 56px action buttons, and clear schedule cards."*
 - **Action:** Point out the Morning Metformin dose card. Click **"I Took This Medicine"**.
 - **Result:** Auditory chime rings ($520\text{Hz} \to 660\text{Hz}$), badge flips to Emerald `TAKEN`, and audit log records confirmation with sub-second response.
 
-### Act 2: Senior Autonomy & The Cryptographic Care Circle (Time: 1:30 – 3:00)
+### Act 2: Senior Autonomy & The Cryptographic Care Circle (Time: 1:30 to 3:00)
 - **Visual:** Switch to **"Care Circle & Privacy"** tab.
 - **Speaker:** *"Notice the privacy banner: Robert is in control. He decides who enters his care circle. Robert wants to invite his home nurse, Sarah."*
 - **Action:** Select **Caregiver**, configure permissions (`canManageMeds: true`, `canManageAppointments: true`), and click **"Generate Single-Use Passcode"**.
 - **Result:** Passcode modal displays a 6-digit numeric code with an active 15-minute countdown.
 - **Speaker:** *"This passcode is never stored plaintext. It is hashed with SHA-256 and peppered server-side. Once redeemed, it burns immediately."*
 
-### Act 3: The Deterministic Escalation Engine (Time: 3:00 – 4:30)
+### Act 3: The Deterministic Escalation Engine (Time: 3:00 to 4:30)
 - **Visual:** In the top Judge Live Evaluation Bar, click **"Run Reminder Check Now"** (invoking `POST /api/scheduler/run-check` with simulated time advance).
 - **Speaker:** *"What happens when a dose is missed? Most apps just buzz once on a muted phone. In ElderSync, our backend scheduler evaluates unconfirmed doses past Robert's 3-minute grace window."*
 - **Action:** Switch role to **Caregiver (Nurse Sarah Jenkins)**.
 - **Result:** The **Priority Escalation Queue** highlights an amber/red escalation badge with `aria-live="polite"` announcing an unconfirmed Metformin dose.
 - **Speaker:** *"Notice the clinical distinction: ElderSync states 'Unconfirmed Dose', not 'Missed Dose'. It avoids false accusations while ensuring immediate family visibility."*
 
-### Act 4: Closed-Loop Caregiver Collaboration (Time: 4:30 – 6:00)
+### Act 4: Closed-Loop Caregiver Collaboration (Time: 4:30 to 6:00)
 - **Visual:** In Caregiver view, click **"Acknowledge & Record Follow-up"**.
-- **Action:** Enter clinical note: *"Called Robert—he was in the garden, took medication with a glass of water."* Check *"Mark as Confirmed Taken"*.
+- **Action:** Enter clinical note: *"Called Robert: he was in the garden, took medication with a glass of water."* Check *"Mark as Confirmed Taken"*.
 - **Result:** Escalation queue clears instantly, dose status updates to `TAKEN`, and a permanent audit log entry is written.
 - **Speaker:** *"Now Robert's son David sees that Nurse Sarah handled the check-in. Zero duplicate panicked phone calls. Complete family alignment."*
 
-### Act 5: Real Adherence Analytics & System Verification (Time: 6:00 – 7:30)
+### Act 5: Real Adherence Analytics & System Verification (Time: 6:00 to 7:30)
 - **Visual:** Navigate to **"Adherence Insights"**.
 - **Speaker:** *"ElderSync computes real 7-day adherence trends from dose logs, identifying that Robert's highest disruption period is Evening. Finally, our platform is verified through 16 automated enterprise test suites and 10 sanitization gates with 100% pass rate."*
 - **Action:** Show terminal with `npm test` running 26/26 passing tests in 1.5 seconds.
@@ -331,7 +331,7 @@ ElderSync does not display mock analytics. The **Adherence Engine** dynamically 
 
 ## 15. Enterprise Testing Matrix & Quality Gates
 
-ElderSync is validated by **26 automated automated test suites** executed via Vitest and Supertest:
+ElderSync is validated by **26 automated test suites** executed via Vitest and Supertest:
 
 ```
 Test Files  2 passed (2)
@@ -359,7 +359,7 @@ Duration    1.56s
 | **TC-14** | Boundary Conditions & Date Rollover | Validates time period classification across midnight, dawn, and leap years. |
 | **TC-15** | OWASP Security Headers & CORS | Enforces `nosniff`, `X-Frame-Options`, and origin-matched CORS headers. |
 | **TC-16** | Concurrent Requests & State Invariance | 5 concurrent confirmation requests complete idempotently with 0 corruption. |
-| **Sec-01–10**| Unit Sanitizer Matrix | Validates entity escaping, script stripping, event handler removal, and bounds. |
+| **Sec-01 to 10**| Unit Sanitizer Matrix | Validates entity escaping, script stripping, event handler removal, and bounds. |
 
 ---
 
@@ -375,7 +375,7 @@ Duration    1.56s
 - "Peace of Mind" Family Plan           - Medicare RPM / CCM Partnerships
 - Free Tier: Patient + 1 Caregiver      - Assisted Living Facilities
 - Premium: Unlimited Family Members     - Hospital Discharge Non-Adherence
-- Pricing: $9.99 / month                - Pricing: $4–$8 / patient / month
+- Pricing: $9.99 / month                - Pricing: $4 to $8 / patient / month
 ```
 
 ### Go-To-Market Strategy
@@ -390,203 +390,256 @@ Duration    1.56s
 ### Slide 1: Title & Positioning
 - **Title:** ElderSync: Patient-Centred Medication Adherence & Collaborative Care Circle
 - **Subtitle:** Preserving Senior Independence while Delivering Proactive Family Peace of Mind
-- **Presenter:** Farhan Mallik (PromptWars × Catalyst Round 2)
-- **Visual Cue:** Hero screenshot of ElderSync featuring high-contrast layout, Robert Vance profile badge, and live schedule card.
+- **Presenter:** Farhan Mallik (PromptWars x Catalyst Round 2)
+- **Time Budget:** 0:00 to 0:25 (25 seconds)
+- **Visual Geometry:** Asymmetric Split (Left 55% Title & Value Hook; Right 45% Hero Mockup with live status badges).
+- **Sound Bite:** *"Not another passive alarm clock, but an autonomous safety net."*
 - **Speaker Notes:** *"Good afternoon, judges. Today I am excited to present ElderSync, an autonomous healthcare platform that fundamentally rethinks how elderly patients manage chronic medications living independently at home."*
+- **Transition Bridge:** *"To understand why we built ElderSync, let's look at the quiet crisis unfolding in millions of households every day."*
 
 ---
 
 ### Slide 2: The Silent Crisis
 - **Title:** The \$300 Billion Medication Adherence Crisis
+- **Time Budget:** 0:25 to 0:50 (25 seconds)
+- **Visual Geometry:** 3-Metric Metric Trio Callout Cards with high-contrast numerical highlights.
 - **Bullet Points:**
   - Over 50% of seniors fail to take prescribed medications correctly.
-  - \$100B–\$300B in avoidable emergency room visits and hospital readmissions annually.
+  - \$100B to \$300B in avoidable emergency room visits and hospital readmissions annually.
   - 125,000 preventable deaths each year in the United States alone.
-- **Visual Cue:** Split graphic: Left shows pill bottles; Right shows emergency room hospital telemetry.
+- **Sound Bite:** *"Non-adherence is not defiance: it is the silent failure of communication."*
 - **Speaker Notes:** *"Medication non-adherence is not a willpower problem; it is a communication and routine failure. When a 74-year-old living alone misses blood pressure medication, the consequences are catastrophic."*
+- **Transition Bridge:** *"So why haven't existing medical reminder apps solved this?"*
 
 ---
 
 ### Slide 3: The Flaw in Existing Solutions
 - **Title:** Why Current Health Apps Fail Elderly Patients
+- **Time Budget:** 0:50 to 1:20 (30 seconds)
+- **Visual Geometry:** 2x2 Grid of Failure Modes with red indicator badges.
 - **Bullet Points:**
   - **Passive Alarms:** Swiped away or muted phone notifications leave caregivers blind.
   - **Intrusive Surveillance:** Enterprise tools strip senior autonomy, treating them as passive hospital patients.
   - **Inaccessible Design:** Fiddly 14px grey fonts and tiny 32px touch targets alienate seniors with tremors or low vision.
   - **Duplicate Family Panic:** Disjointed group chats lead to multiple panics or bystander apathy.
-- **Visual Cue:** Red warning callouts over generic competitor interfaces.
+- **Sound Bite:** *"Muted alarms leave families blind. Surveillance leaves seniors resentful."*
 - **Speaker Notes:** *"Current apps stop at passive alarms. When an alarm is muted, the system goes dark. Conversely, surveillance apps make seniors feel spied on. ElderSync solves both problems."*
+- **Transition Bridge:** *"This led us to invent a completely new paradigm: The Sovereign Patient Model."*
 
 ---
 
 ### Slide 4: The ElderSync Paradigm Shift
 - **Title:** Our Core Innovation: The Sovereign Patient Model
+- **Time Budget:** 1:20 to 1:50 (30 seconds)
+- **Visual Geometry:** Concentric Circles Diagram (Patient at center, Caregiver and Family orbiting outer ring).
 - **Bullet Points:**
   - The senior citizen is the root owner and administrator of their care circle.
   - Independence as the default; family mobilization only when unconfirmed doses exceed grace windows.
   - Dignity preserved through senior-friendly, non-condescending interfaces.
-- **Visual Cue:** Diagram illustrating the Senior at the center, surrounded by authorized Caregiver and Family rings.
+- **Sound Bite:** *"Senior independence at home, backed by proactive family certainty."*
 - **Speaker Notes:** *"ElderSync inverts the healthcare hierarchy. In ElderSync, the patient owns their record and invites their support circle on their own terms."*
+- **Transition Bridge:** *"Let's see how this translates into a practical, multi-role ecosystem."*
 
 ---
 
 ### Slide 5: The Tri-Role Care Circle Ecosystem
 - **Title:** Multi-Role Permission Matrix: Scoped, Role-Aware Access
+- **Time Budget:** 1:50 to 2:15 (25 seconds)
+- **Visual Geometry:** 3-Column Comparative Card Layout (Patient in Teal, Caregiver in Emerald, Family in Slate).
 - **Bullet Points:**
   - **Patient:** Root owner, confirms doses, generates passcodes, sets grace windows.
   - **Caregiver (Nurse/Aide):** Manages medications, acknowledges escalations, logs clinical notes.
   - **Family (Adult Children):** Read-only visibility into routines, peace-of-mind alerts, emergency check-in.
-- **Visual Cue:** Clean 3-column comparative role cards with permission toggles.
-- **Speaker Notes:** *"Notice how roles are separated. Adult children can see their father's routine and receive alerts, but cannot accidentally alter medical dosages—preserving clinical safety."*
+- **Sound Bite:** *"Clear boundaries prevent family chaos."*
+- **Speaker Notes:** *"Notice how roles are separated. Adult children can see their father's routine and receive alerts, but cannot accidentally alter medical dosages: preserving clinical safety."*
+- **Transition Bridge:** *"Underpinning this entire care circle is our deterministic escalation engine."*
 
 ---
 
 ### Slide 6: The Deterministic Escalation State Machine
 - **Title:** Server-Side State Machine & Grace Window Architecture
+- **Time Budget:** 2:15 to 2:45 (30 seconds)
+- **Visual Geometry:** Horizontal State Transition Flowchart (`SCHEDULED` -> `REMINDER` -> `TAKEN`/`ESCALATED` -> `ACKNOWLEDGED`).
 - **Bullet Points:**
-  - Every dose transitions deterministically: `SCHEDULED` $\to$ `REMINDER_SENT` $\to$ `TAKEN` / `SKIPPED` / `UNABLE` $\to$ `UNCONFIRMED_ESCALATED`.
-  - Configurable Grace Window (3 min for demo; 15–60 min in production).
+  - Every dose transitions deterministically: `SCHEDULED` -> `REMINDER_SENT` -> `TAKEN` / `SKIPPED` / `UNABLE` -> `UNCONFIRMED_ESCALATED`.
+  - Configurable Grace Window (3 min for demo; 15 to 60 min in production).
   - Background cron verification independent of whether the user's browser is open.
-- **Visual Cue:** Flowchart showing the state machine transitions and grace threshold.
+- **Sound Bite:** *"Server-side certainty: alerts fire even if the senior's phone is switched off."*
 - **Speaker Notes:** *"Dose tracking lives on the backend server, not on client browser timers. If Robert's phone battery dies, our backend scheduler still evaluates the grace deadline."*
+- **Transition Bridge:** *"And when an escalation does fire, how do we prevent alert fatigue?"*
 
 ---
 
 ### Slide 7: Idempotent Notification Engine
 - **Title:** Zero-Duplicate Outbox: Eliminating Family Notification Spam
+- **Time Budget:** 2:45 to 3:05 (20 seconds)
+- **Visual Geometry:** Split Box: Left shows Key Hash Formulation; Right shows Delivery Status Inspector.
 - **Bullet Points:**
   - Real transactional email alerts via Resend / SMTP with local outbox inspection.
   - Deterministic idempotency keys (`esc_${doseId}_${userId}`).
   - Prevents alert fatigue and panic during distributed cron retries.
-- **Visual Cue:** Code snippet showing idempotency key comparison and delivery locking.
+- **Sound Bite:** *"Zero duplicate panic emails. Ever."*
 - **Speaker Notes:** *"Nothing causes panic faster than three duplicate emergency emails. Our idempotent delivery lock guarantees that each authorized caregiver receives exactly one notification."*
+- **Transition Bridge:** *"Security in eldercare must also be simple for seniors to use, starting with how people join."*
 
 ---
 
 ### Slide 8: Cryptographic Care Circle Passcodes
 - **Title:** 6-Digit Single-Use Passcodes: Zero Passwords, Maximum Security
+- **Time Budget:** 3:05 to 3:30 (25 seconds)
+- **Visual Geometry:** Cryptographic Lifecycle Graphic (Generate -> Salted SHA-256 -> 15m TTL Countdown -> Atomic Burn).
 - **Bullet Points:**
   - Expiring 15-minute TTL generated by patient.
   - Salted with server-side pepper and stored strictly as SHA-256 hashes.
   - Brute-force rate limiting: maximum 5 attempts per 15 minutes.
   - Constant-time verification eliminating timing attacks.
-- **Visual Cue:** Graphic showing plain code generating, hashing into SHA-256, and burning after redemption.
+- **Sound Bite:** *"Bank-grade cryptographic safety without making grandpa remember a password."*
 - **Speaker Notes:** *"Elderly users struggle with complex passwords. ElderSync generates a 6-digit code valid for 15 minutes that burns upon entry, combining senior simplicity with bank-grade security."*
+- **Transition Bridge:** *"Now let's examine our physical design for aging eyes and arthritic hands."*
 
 ---
 
 ### Slide 9: Senior-First Ergonomics & Accessibility
 - **Title:** Designing for Arthritic Hands and Aging Eyes (WCAG AAA)
+- **Time Budget:** 3:30 to 3:55 (25 seconds)
+- **Visual Geometry:** Side-by-Side Comparison: Standard 36px Button vs ElderSync's 56px Tactile Button with audio waveform graphic.
 - **Bullet Points:**
   - Minimum 56px interactive touch targets exceeding mobile guidelines.
   - High-contrast clinical theme ($\ge 7:1$ contrast ratio).
   - Dynamic Font Scaler ($A / A+ / A++$) scaling up to 125%.
   - Dual-frequency Web Audio confirmation chimes ($520\text{Hz} \to 660\text{Hz}$).
-- **Visual Cue:** Side-by-side comparison of standard 36px button vs. ElderSync's 56px tactile action control.
+- **Sound Bite:** *"Accessible by design, not by afterthought."*
 - **Speaker Notes:** *"Every interactive touch target in ElderSync is at least 56 pixels tall. We integrated dual-tone acoustic chimes so visually impaired seniors receive instant sensory confirmation."*
+- **Transition Bridge:** *"Beyond day-to-day reminders, ElderSync builds longitudinal health intelligence."*
 
 ---
 
 ### Slide 10: Real Adherence Analytics & Routine Intelligence
 - **Title:** Moving Beyond Raw Counts: Routine Disruption Insights
+- **Time Budget:** 3:55 to 4:20 (25 seconds)
+- **Visual Geometry:** Analytics Dashboard Preview featuring Donut Adherence Chart and 4-Quadrant Time-of-Day Bar.
 - **Bullet Points:**
   - 7-Day Adherence Percentage calculated dynamically from `doseLogs`.
   - Routine Disruption Quadrants: Pinpoints whether Morning, Afternoon, Evening, or Night routines slip.
   - Confirmation delay latency tracking.
-- **Visual Cue:** Adherence analytics dashboard featuring donut chart, disruption slot indicator, and delay metrics.
+- **Sound Bite:** *"Turning daily dose clicks into actionable clinical insight."*
 - **Speaker Notes:** *"ElderSync doesn't just display a percentage; it identifies patterns. If evening doses consistently slip, caregivers can consult doctors to shift medication timing."*
+- **Transition Bridge:** *"Medication management is closely tied to clinical appointments, which brings us to co-management."*
 
 ---
 
 ### Slide 11: Doctor Appointment Co-Management
 - **Title:** Proactive Healthcare Visit Management
+- **Time Budget:** 4:20 to 4:40 (20 seconds)
+- **Visual Geometry:** Doctor Visit Card with Clinic Badge, Doctor Specialty, and Proactive Reminder Pill.
 - **Bullet Points:**
   - Shared calendar for cardiology, endocrinology, and primary care consultations.
   - Caregiver co-management permissions.
   - Automated 24-hour proactive reminder alerts.
   - Permanent audit logging of all scheduling modifications.
-- **Visual Cue:** Upcoming appointments cards with doctor specialty, location, and calendar badges.
+- **Sound Bite:** *"Connecting medications and doctor visits in one shared circle."*
 - **Speaker Notes:** *"Medication and clinical appointments are inseparable. ElderSync co-manages doctor visits, ensuring seniors never miss critical lab work or consultations."*
+- **Transition Bridge:** *"Let's take a look under the hood at our production-grade architecture."*
 
 ---
 
 ### Slide 12: Architecture & Full-Stack Implementation
 - **Title:** Production-Grade Architecture: React 18, Express, & Strict TypeScript
+- **Time Budget:** 4:40 to 5:05 (25 seconds)
+- **Visual Geometry:** Architectural Topology Diagram connecting Frontend SPA, REST API, Outbox Engine, and Cloud Run Container.
 - **Bullet Points:**
   - Frontend: React 18, Vite, Tailwind CSS, Lucide Icons.
   - Backend: Node.js, Express, Zod 3.23 schema validation, Rate Limiting.
   - Security: Helmet OWASP headers, input sanitization against stored XSS.
   - Containerized: Multi-stage Alpine Docker container ready for Google Cloud Run.
-- **Visual Cue:** Complete architectural component diagram illustrating client, API, outbox, and data layers.
+- **Sound Bite:** *"Built for zero cold starts and sub-second execution."*
 - **Speaker Notes:** *"Built with zero shortcuts. Strict TypeScript, runtime Zod validation, and containerized Docker execution ensure sub-second latency and absolute reliability."*
+- **Transition Bridge:** *"How does ElderSync compare with other solutions in the market?"*
 
 ---
 
 ### Slide 13: Competitive Advantage
 - **Title:** Competitive Landscape: Why ElderSync Wins
+- **Time Budget:** 5:05 to 5:30 (25 seconds)
+- **Visual Geometry:** 2x2 Positioning Matrix (Autonomy on Y-axis, Proactive Collaboration on X-axis).
 - **Bullet Points:**
   - Comparison against Medisafe, CareZone, PillPack, and Apple Health.
   - The only platform combining **Patient Sovereignty** with **Closed-Loop Escalation**.
   - Elimination of subscription hardware paywalls.
-- **Visual Cue:** Competitive 2x2 matrix and feature checkmark table.
+- **Sound Bite:** *"We don't sell expensive locked hardware: we deliver sovereign software."*
 - **Speaker Notes:** *"While Medisafe offers isolated phone reminders and enterprise platforms enforce hospital-like surveillance, ElderSync owns the sweet spot of sovereign collaboration."*
+- **Transition Bridge:** *"Software in healthcare demands absolute verification. Here is how we tested ElderSync."*
 
 ---
 
 ### Slide 14: Automated Quality & Testing Rigor
 - **Title:** 26/26 Automated Quality Gates (100% Pass Rate in 1.5s)
+- **Time Budget:** 5:30 to 5:50 (20 seconds)
+- **Visual Geometry:** Green Test Matrix Terminal Block with 16 Enterprise Gates and 10 Sanitizer Tests highlighted.
 - **Bullet Points:**
   - 16 Enterprise End-to-End Quality Gates (`tests/eldersync.test.ts`).
   - 10 Input Sanitization & Stored XSS Neutralization Tests (`tests/sanitize.test.ts`).
   - Idempotency, rate limiting, and RBAC authorization boundary verification.
-- **Visual Cue:** Terminal screenshot showing 26 green passing test suites.
+- **Sound Bite:** *"26 quality gates. 100% pass rate. 1.5 seconds."*
 - **Speaker Notes:** *"Quality in healthcare software is non-negotiable. Every state transition, permission check, and cryptographic routine is validated by 26 automated quality gates."*
+- **Transition Bridge:** *"Let me now walk you through our live 5-Act demonstration."*
 
 ---
 
 ### Slide 15: Live Demo Walkthrough (The 5 Acts)
 - **Title:** ElderSync in Action: The 5-Act Demonstration
+- **Time Budget:** 5:50 to 6:20 (30 seconds)
+- **Visual Geometry:** 5-Step Chevron Timeline (Confirm -> Invite -> Escalate -> Acknowledge -> Insights).
 - **Bullet Points:**
   - **Act 1:** Robert Vance 1-tap dose confirmation with audio feedback.
   - **Act 2:** Generation of single-use 6-digit care circle passcode.
   - **Act 3:** Simulated grace period elapsed; caregiver priority escalation triggered.
   - **Act 4:** Nurse Sarah Jenkins acknowledges escalation and logs follow-up note.
   - **Act 5:** Live adherence analytics and audit trail synchronization.
-- **Visual Cue:** Flow progression diagram representing the 5 live demo acts.
+- **Sound Bite:** *"Full circle closed in less than 3 minutes."*
 - **Speaker Notes:** *"In our live demo, judges can experience the full round-trip flow in less than 3 minutes using our simulated fast-forward controls."*
+- **Transition Bridge:** *"How do we scale this into a sustainable business?"*
 
 ---
 
 ### Slide 16: Business Model & Market Viability
 - **Title:** Commercialization & Market Expansion
+- **Time Budget:** 6:20 to 6:40 (20 seconds)
+- **Visual Geometry:** Two-Tier Funnel: Left B2C Direct Consumer Funnel; Right B2B2C Medicare RPM Partner Channel.
 - **Bullet Points:**
   - **B2C Premium Family Care:** \$9.99/month for multi-member family circle access.
   - **B2B2C Medicare RPM Integration:** CPT Code 99453/99454 reimbursement for partner clinics.
   - **Assisted Living Enterprise SaaS:** Multi-patient monitoring portals for senior communities.
-- **Visual Cue:** Market size projection chart and tiered pricing cards.
+- **Sound Bite:** *"A dual-engine model: consumer family trust plus Medicare clinical reimbursement."*
 - **Speaker Notes:** *"ElderSync has a clear monetization path: direct-to-consumer family subscriptions and B2B2C Medicare Remote Patient Monitoring partnerships."*
+- **Transition Bridge:** *"Where is ElderSync heading next?"*
 
 ---
 
 ### Slide 17: Product Roadmap
 - **Title:** Future Vision & Roadmap
+- **Time Budget:** 6:40 to 6:55 (15 seconds)
+- **Visual Geometry:** 3-Horizon Milestone Roadmap with checkmark on Phase 1 MVP.
 - **Bullet Points:**
   - **Phase 1 (Complete):** Core sovereign adherence, escalation state machine, WCAG AAA UI.
   - **Phase 2 (Q1 2027):** Smart blister-pack IoT integration and Bluetooth pillbox pairing.
   - **Phase 3 (Q2 2027):** Multimodal Prescription OCR and localized voice-activated logging.
-- **Visual Cue:** Visual timeline roadmap with completed MVP milestones and future horizons.
+- **Sound Bite:** *"From sovereign software to connected physical care."*
 - **Speaker Notes:** *"Our MVP is complete and deployed. Next, we are integrating smart blister packs and multimodal prescription scanning to streamline medication onboarding."*
+- **Transition Bridge:** *"To conclude..."*
 
 ---
 
 ### Slide 18: Summary & Call to Action
 - **Title:** ElderSync: Dignity in Aging, Certainty in Care
+- **Time Budget:** 6:55 to 7:15 (20 seconds)
+- **Visual Geometry:** Full-Bleed Brand Banner with Live Demo URL, GitHub QR Code, and Evaluation Badge.
 - **Bullet Points:**
   - Preserving senior autonomy through sovereign digital design.
   - Eliminating missed medication tragedies with deterministic escalation.
   - Ready for live evaluation on Google Cloud Run and Netlify.
   - **GitHub:** `https://github.com/farhanmallik05/eldersync`
-- **Visual Cue:** High-impact closing banner with QR code linking to the live repository and deployment.
+- **Sound Bite:** *"ElderSync: Preserving dignity, guaranteeing care."*
 - **Speaker Notes:** *"ElderSync moves beyond isolated phone alarms toward respectful, collaborative care. Thank you, judges, and I welcome your questions."*
 
 ---
@@ -613,4 +666,39 @@ Duration    1.56s
 
 ---
 
-*(Document generated for PromptWars × Catalyst Round 2 Presentation Context & Pitch Delivery)*
+## 19. Presenter Emergency Fallback & Offline Checklist
+
+If conference WiFi drops or projector connectivity fails during your presentation, execute this fail-safe checklist:
+1. **Local Server Ready:** The unified ElderSync server runs locally at `http://localhost:8000`. Launch with `npm start` in PowerShell.
+2. **Instant Demo Seeding:** Click **Reset Demo Data** in the top navigation or execute `POST /api/demo/seed` to restore Robert Vance, Nurse Sarah, and David Vance in under 50ms.
+3. **Offline Audio Synthesizer:** The Web Audio API operates 100% offline within the browser engine without requiring audio asset downloads.
+4. **Local Outbox Inspection:** When demoing escalations without internet access, open the **Outbox Inspector** in the Judge Bar to show captured emails with idempotency keys.
+
+---
+
+## 20. 30-Second Elevator Pitch & 60-Second Investor Hook
+
+### 30-Second Elevator Pitch
+*"Every day, millions of elderly parents living alone miss critical medications, and their families don't find out until a preventable hospital admission occurs. Current apps buzz once and go silent. ElderSync solves this through a patient-first model: the senior keeps complete dignity and autonomy, confirming doses with large 56px buttons. But if a dose remains unconfirmed past an agreed grace window, ElderSync automatically escalates to authorized caregivers with zero-duplicate email locks. It is senior independence at home, backed by proactive family peace of mind."*
+
+### 60-Second Investor Hook
+*"Medication non-adherence is a \$300 billion problem driving 125,000 preventable deaths every year. The digital health market is split between passive phone alarms that get ignored and intrusive surveillance tools that seniors despise. ElderSync bridges this gap with software-driven patient sovereignty. The senior owns their profile and invites their care circle via expiring 6-digit cryptographic passcodes. Our deterministic server-side engine monitors grace windows, escalating unconfirmed doses to family members who can close the loop with clinical notes in real time. We monetize through B2C family subscriptions at \$9.99/month and B2B2C partnerships with geriatric clinics reimbursable under Medicare Remote Patient Monitoring CPT Codes 99453 and 99454. ElderSync turns non-adherence panic into calm, dignified collaboration."*
+
+---
+
+## 21. Slide Deck Design System Specification
+
+| Design Element | Specification | Rationale |
+|---|---|---|
+| **Canvas Background** | Pure Slate `#0F172A` (Dark Mode Deck) or `#F8FAFC` (Clinical Light) | Professional, modern healthcare aesthetic |
+| **Primary Typography** | Plus Jakarta Sans (Headings, 700/800 Bold) | Humanist sans-serif with high legibility at distance |
+| **Secondary Typography** | Inter (Body, 400/500 Medium) | Clean neutral tone for descriptions and bullet points |
+| **Code & Metric Type** | JetBrains Mono (800 Bold) | Distinct tabular numbers for statistics and hashes |
+| **Primary Brand Accent** | Teal `#0D9488` | Associated with calm, clinical confidence and safety |
+| **Success Semantic** | Emerald `#16A34A` | Instant positive reinforcement for `TAKEN` doses |
+| **Warning / Grace** | Amber `#D97706` | Attentive cue for grace periods without panic |
+| **Escalation / Emergency**| Crimson `#DC2626` | High-urgency alert for unconfirmed doses and help requests |
+
+---
+
+*(Master context compiled and optimized for ElderSync Hackathon Presentation and Pitch Deck Delivery)*
