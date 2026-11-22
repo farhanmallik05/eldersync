@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { db } from '../config/database.js';
 import { SchedulerCheckSchema } from '../types/index.js';
 import { emailService } from '../services/emailService.js';
+import { escapeHtml } from '../utils/sanitize.js';
 
 const router = Router();
 
@@ -42,14 +43,14 @@ router.post('/run-check', async (req, res) => {
         recipientEmail: patient.email,
         recipientRole: 'PATIENT',
         type: 'DOSE_REMINDER',
-        subject: `⏰ Medication Reminder: Time for your ${dose.medicineName}`,
+        subject: `⏰ Medication Reminder: Time for your ${escapeHtml(dose.medicineName)}`,
         html: `
           <div style="font-family: sans-serif; padding: 20px; border-left: 6px solid #0D9488; background: #F0FDFA;">
             <h2 style="color: #0F766E; margin-top: 0;">Medication Reminder</h2>
-            <p style="font-size: 18px;">Hello ${patient.name},</p>
+            <p style="font-size: 18px;">Hello ${escapeHtml(patient.name)},</p>
             <p style="font-size: 16px;">It is time to take your scheduled medication:</p>
             <div style="background: white; padding: 16px; border: 1px solid #99F6E4; border-radius: 8px; margin: 16px 0;">
-              <h3 style="margin: 0; color: #0F172A;">${dose.medicineName} (${dose.dosage})</h3>
+              <h3 style="margin: 0; color: #0F172A;">${escapeHtml(dose.medicineName)} (${escapeHtml(dose.dosage)})</h3>
               <p style="margin: 6px 0 0 0; color: #475569;">${dose.scheduledAt ? new Date(dose.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
             </div>
             <p>Please open ElderSync to confirm when taken.</p>
@@ -81,11 +82,11 @@ router.post('/run-check', async (req, res) => {
           recipientEmail: caregiver.memberEmail,
           recipientRole: caregiver.role,
           type: 'CAREGIVER_ESCALATION',
-          subject: `⚠️ Care Alert: Unconfirmed Dose for ${patient.name} (${dose.medicineName})`,
+          subject: `⚠️ Care Alert: Unconfirmed Dose for ${escapeHtml(patient.name)} (${escapeHtml(dose.medicineName)})`,
           html: `
             <div style="font-family: sans-serif; padding: 20px; border-left: 6px solid #DC2626; background: #FEF2F2;">
               <h2 style="color: #991B1B; margin-top: 0;">Unconfirmed Dose Escalation</h2>
-              <p style="font-size: 16px;"><strong>${patient.name}</strong>'s scheduled dose of <strong>${dose.medicineName} (${dose.dosage})</strong> was due at ${new Date(dose.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.</p>
+              <p style="font-size: 16px;"><strong>${escapeHtml(patient.name)}</strong>'s scheduled dose of <strong>${escapeHtml(dose.medicineName)} (${escapeHtml(dose.dosage)})</strong> was due at ${new Date(dose.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.</p>
               <p style="color: #B91C1C;"><strong>Grace Period Status:</strong> The ${patient.gracePeriodMinutes}-minute confirmation grace window has elapsed without a recorded confirmation.</p>
               <div style="background: white; padding: 12px; border: 1px solid #FCA5A5; border-radius: 6px; margin: 16px 0;">
                 <p style="margin: 0; font-size: 14px; color: #4B5563;">
@@ -129,16 +130,16 @@ router.post('/run-check', async (req, res) => {
         recipientEmail: patient.email,
         recipientRole: 'PATIENT',
         type: 'APPOINTMENT_REMINDER',
-        subject: `📅 Doctor Visit Reminder: ${appt.doctorName} (${appt.specialty})`,
+        subject: `📅 Doctor Visit Reminder: ${escapeHtml(appt.doctorName)} (${escapeHtml(appt.specialty)})`,
         html: `
           <div style="font-family: sans-serif; padding: 20px; border-left: 6px solid #2563EB; background: #EFF6FF;">
             <h2 style="color: #1D4ED8; margin-top: 0;">Upcoming Appointment</h2>
-            <p style="font-size: 16px;">Hello ${patient.name}, this is a reminder for your upcoming medical consultation:</p>
+            <p style="font-size: 16px;">Hello ${escapeHtml(patient.name)}, this is a reminder for your upcoming medical consultation:</p>
             <div style="background: white; padding: 16px; border: 1px solid #BFDBFE; border-radius: 8px;">
-              <h3 style="margin: 0; color: #1E3A8A;">${appt.doctorName} — ${appt.specialty}</h3>
-              <p style="margin: 4px 0;"><strong>Location:</strong> ${appt.location}</p>
+              <h3 style="margin: 0; color: #1E3A8A;">${escapeHtml(appt.doctorName)} - ${escapeHtml(appt.specialty)}</h3>
+              <p style="margin: 4px 0;"><strong>Location:</strong> ${escapeHtml(appt.location)}</p>
               <p style="margin: 4px 0;"><strong>Date & Time:</strong> ${new Date(appt.scheduledAt).toLocaleString()}</p>
-              ${appt.notes ? `<p style="margin: 4px 0;"><strong>Notes:</strong> ${appt.notes}</p>` : ''}
+              ${appt.notes ? `<p style="margin: 4px 0;"><strong>Notes:</strong> ${escapeHtml(appt.notes)}</p>` : ''}
             </div>
           </div>
         `,

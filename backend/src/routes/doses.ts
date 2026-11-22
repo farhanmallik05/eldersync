@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import { checkPatientAccess } from '../middleware/rbac.js';
 import { ConfirmDoseSchema, AcknowledgeDoseSchema } from '../types/index.js';
 import { emailService } from '../services/emailService.js';
-import { sanitizeString } from '../utils/sanitize.js';
+import { sanitizeString, escapeHtml } from '../utils/sanitize.js';
 
 const router = Router();
 
@@ -60,13 +60,13 @@ router.post('/:doseId/confirm', authMiddleware, async (req, res) => {
           recipientEmail: member.memberEmail,
           recipientRole: member.role,
           type: 'CAREGIVER_ESCALATION',
-          subject: `⚠️ URGENT ALERT: ${patient?.name || 'Patient'} Unable to Take ${dose.medicineName}`,
+          subject: `⚠️ URGENT ALERT: ${escapeHtml(patient?.name || 'Patient')} Unable to Take ${escapeHtml(dose.medicineName)}`,
           html: `
             <div style="font-family: sans-serif; padding: 20px; border-left: 6px solid #DC2626; background: #FEF2F2;">
               <h2 style="color: #991B1B; margin-top: 0;">Medication Assistance Alert</h2>
-              <p style="font-size: 16px;"><strong>${patient?.name || 'Patient'}</strong> indicated they are unable to take their scheduled dose of <strong>${dose.medicineName} (${dose.dosage})</strong>.</p>
-              <p><strong>Reason provided:</strong> ${patientNote || 'No specific reason given'}</p>
-              <p><strong>Scheduled Time:</strong> ${dose.scheduledAt}</p>
+              <p style="font-size: 16px;"><strong>${escapeHtml(patient?.name || 'Patient')}</strong> indicated they are unable to take their scheduled dose of <strong>${escapeHtml(dose.medicineName)} (${escapeHtml(dose.dosage)})</strong>.</p>
+              <p><strong>Reason provided:</strong> ${escapeHtml(sanitizedNote || 'No specific reason given')}</p>
+              <p><strong>Scheduled Time:</strong> ${escapeHtml(dose.scheduledAt)}</p>
               <p>Please check on the patient or open your ElderSync Caregiver Dashboard to acknowledge.</p>
             </div>
           `,
@@ -140,7 +140,7 @@ router.post('/:doseId/acknowledge', authMiddleware, (req, res) => {
     actorUid: req.user!.uid,
     actorName: req.user!.name,
     action: 'DOSE_ACKNOWLEDGED',
-    details: `Caregiver acknowledged dose for ${dose.medicineName}.${markAsTaken ? ' Marked as TAKEN.' : ''} Note: "${acknowledgementNote}"`,
+    details: `Caregiver acknowledged dose for ${dose.medicineName}.${markAsTaken ? ' Marked as TAKEN.' : ''} Note: "${sanitizedNote}"`,
     timestamp: nowIso,
   });
 
